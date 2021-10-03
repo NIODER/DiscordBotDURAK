@@ -48,33 +48,13 @@ namespace DiscordBotDURAK
             "42 "
         };
 
-        public static string GetSupplement()
-        {
-            Random random = new();
-            if (random.Next(100) % 2 == 0)
-            {
-                return _supplements[random.Next(0, _supplements.Count - 1)];
-            }
-            else
-            {
-                return "";
-            }
-        }
+        public static string GetSupplement() => _supplements[new Random().Next(_supplements.Count)];
 
-        public static string RandomResponse()
-        {
-            Random random = new();
-            return _botResponses[random.Next(0, _botResponses.Count - 1)];
-        }
+        public static string RandomResponse() => _botResponses[new Random().Next(_botResponses.Count)];
 
-        public static void AddResponse(string msg)
-        {
-            _botResponses.Add(msg);
-        }
-        public static void AddSupplement(string msg)
-        {
-            _supplements.Add(msg);
-        }
+        public static void AddResponse(string msg) => _botResponses.Add(msg);
+
+        public static void AddSupplement(string msg) => _supplements.Add(msg);
 
         public static bool TriggerCheck(string msg)
         {
@@ -82,15 +62,7 @@ namespace DiscordBotDURAK
             {
                 if (msg.ToLower().Contains(trigger))
                 {
-                    Random random = new();
-                    if (random.Next(100) % 2 == 0)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return true;
                 }
             }
             return false;

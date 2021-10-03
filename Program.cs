@@ -23,7 +23,7 @@ namespace DiscordBotDURAK
 
             var token = "";
 
-            using (StreamReader reader = new StreamReader(File.OpenRead(@"E:\TOKEN.txt")))
+            using (StreamReader reader = new StreamReader(File.OpenRead(Constants.Constants.tokenPath)))
             {
                 token = reader.ReadToEnd();
             }
@@ -76,16 +76,17 @@ namespace DiscordBotDURAK
         }
 
         #region BOT FUNCTIONS
+
         private async void RAND_Func(SocketMessage message)
         {
-            Random rand = new Random();
-            await message.Channel.SendMessageAsync($"<@{message.Author.Id}> Артему сегодня повезло, выпало число {rand.Next(-1000, 1000)}");
+            await message.Channel.SendMessageAsync(
+                $"{message.Author.Username}, Артему сегодня повезло, выпало число {new Random().Next(-1000, 1000)}");
+            Console.WriteLine($"{DateTime.Now}\nОтработал рандом\n__________________________________________\n");
         }
 
         private async void Desider(SocketMessage message)
         {
-            Random random = new();
-            if (random.Next(2) % 2 == 0)
+            if (new Random().Next(2) % 2 == 0)
             {
                 await message.Channel.SendMessageAsync($"{message.Author.Username}, Да");
             }
@@ -93,6 +94,7 @@ namespace DiscordBotDURAK
             {
                 await message.Channel.SendMessageAsync($"{message.Author.Username}, Нет");
             }
+            Console.WriteLine($"{DateTime.Now}\nБот принял решение\n__________________________________________\n");
         }
 
         private async void SPAM_Func(SocketMessage message)
@@ -127,12 +129,13 @@ namespace DiscordBotDURAK
             {
                 await message.Channel.SendMessageAsync("Нихрена не понимаю ни одного слова"); 
             }
+            Console.WriteLine($"{DateTime.Now}\nПроспамлено {word} {counter} раз\n__________________________________________\n");
         }
 
         private async void SHITPOST_Func(SocketMessage message)
         {
             await message.Channel.SendMessageAsync(
-                $"{message.Author.Username}, {Balaboba.Say(RandomMessages.GetSupplement() + message.Content)}");
+                $"{message.Author.Username}, {Balaboba.Say(message.Content)}");
         }
 
         private async void RefModeration(SocketMessage message)
@@ -144,11 +147,12 @@ namespace DiscordBotDURAK
             if (message.Content.ToLower().Contains("разд") || message.Content.ToLower().Contains("нитро") || message.Content.ToLower().Contains("nitro"))
             {
                 await channel.SendMessageAsync($"Вероятно, это очередной скам \n ||{content}||");
+                
                 Console.WriteLine($"Переслано скам сообщение от {message.Author.Username}.");
                 return;
             }
             await channel.SendMessageAsync($"<@{autorId}>: \n\"{content}\"");
-            Console.WriteLine($"Переслано сообщение от {message.Author.Username}.");
+            Console.WriteLine($"{DateTime.Now}\nПереслано сообщение от {message.Author.Username}.\n__________________________________________\n");
         }
 
         private async void SendId(SocketMessage message)
@@ -156,7 +160,7 @@ namespace DiscordBotDURAK
             string id = Convert.ToString(message.Author.Id);
             await message.Author.SendMessageAsync($"Твой ID: {id}");
             await DeleteMessageAsync(message, enableTimer: false);
-            Console.WriteLine($"Отправлено ID {message.Author.Username}.");
+            Console.WriteLine($"{DateTime.Now}\nОтправлено ID {message.Author.Username}.\n__________________________________________\n");
         }
 
         private async Task DeleteMessageAsync(SocketMessage message, bool enableTimer, int timer = 30000)
@@ -173,6 +177,7 @@ namespace DiscordBotDURAK
             {
                 await message.Channel.DeleteMessageAsync(message.Id);
             }
+            Console.WriteLine($"{DateTime.Now}\nУдалено сообщение\n{message.Id}\n{message.Content}\n__________________________________________\n");
         }
 
         private async void Clear(SocketMessage message)
@@ -189,16 +194,9 @@ namespace DiscordBotDURAK
                     }
                 }
             }
-            Console.WriteLine($"Чистин отработал в канале {message.Channel.Name}");
+            Console.WriteLine($"{DateTime.Now}\nЧистин отработал в канале {message.Channel.Name}\n__________________________________________\n");
         }
 
-        //private async void GiveRole(SocketMessage message)
-        //{
-        //    SocketRole role;
-        //    role.Id = ;
-        //    role.d
-        //    message.Author.
-        //}
         #endregion
 
     }

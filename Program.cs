@@ -30,7 +30,7 @@ namespace DiscordBotDURAK
 
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
-
+            CheckGuilds(client.Guilds);
             Console.ReadLine();
         }
 
@@ -70,20 +70,46 @@ namespace DiscordBotDURAK
 
                       if (message.Content.ToLower().Contains("чистин"))
                           Clear(message);
+                      if (message.Content.ToLower().Contains("одмен"))
+                      {
+                          CheckAdmin(message);
+                      }
                   }
               });
             return Task.CompletedTask;
         }
 
+        private void CheckGuilds(IReadOnlyCollection<SocketGuild> guilds)
+        {
+            foreach (var guild in guilds)
+            {
+                if (!DataBase.Search(guild.Id))
+                {
+                    DataBase.Add(guild.Id, guild.OwnerId);
+                }
+            }
+        }
+
         #region BOT FUNCTIONS
 
+        private async void CheckAdmin(SocketMessage message)
+        {
+            foreach (var admin in DataBase.Get(message.Reference.GuildId.Value))
+            {
+                if (Convert.ToUInt64(admin) == message.Author.Id)
+                {
+                    await message.Channel.SendMessageAsync("да ты одмееееен");
+                    return;
+                }
+            }
+            await message.Channel.SendMessageAsync("ты не одмеееен");
+        }
         private async void RAND_Func(SocketMessage message)
         {
             await message.Channel.SendMessageAsync(
                 $"{message.Author.Username}, Артему сегодня повезло, выпало число {new Random().Next(-1000, 1000)}");
             Console.WriteLine($"{DateTime.Now}\nОтработал рандом\n__________________________________________\n");
         }
-
         private async void Desider(SocketMessage message)
         {
             if (new Random().Next(2) % 2 == 0)
@@ -96,7 +122,6 @@ namespace DiscordBotDURAK
             }
             Console.WriteLine($"{DateTime.Now}\nБот принял решение\n__________________________________________\n");
         }
-
         private async void SPAM_Func(SocketMessage message)
         {
             if (message.Channel.Id == 720193176463343666)
@@ -131,13 +156,11 @@ namespace DiscordBotDURAK
             }
             Console.WriteLine($"{DateTime.Now}\nПроспамлено {word} {counter} раз\n__________________________________________\n");
         }
-
         private async void SHITPOST_Func(SocketMessage message)
         {
             await message.Channel.SendMessageAsync(
                 $"{message.Author.Username}, {Balaboba.Say(message.Content)}");
         }
-
         private async void RefModeration(SocketMessage message)
         {
             ulong autorId = message.Author.Id;
@@ -154,7 +177,6 @@ namespace DiscordBotDURAK
             await channel.SendMessageAsync($"<@{autorId}>: \n\"{content}\"");
             Console.WriteLine($"{DateTime.Now}\nПереслано сообщение от {message.Author.Username}.\n__________________________________________\n");
         }
-
         private async void SendId(SocketMessage message)
         {
             string id = Convert.ToString(message.Author.Id);
@@ -162,7 +184,6 @@ namespace DiscordBotDURAK
             await DeleteMessageAsync(message, enableTimer: false);
             Console.WriteLine($"{DateTime.Now}\nОтправлено ID {message.Author.Username}.\n__________________________________________\n");
         }
-
         private async Task DeleteMessageAsync(SocketMessage message, bool enableTimer, int timer = 30000)
         {
             if (enableTimer)
@@ -179,7 +200,6 @@ namespace DiscordBotDURAK
             }
             Console.WriteLine($"{DateTime.Now}\nУдалено сообщение\n{message.Id}\n{message.Content}\n__________________________________________\n");
         }
-
         private async void Clear(SocketMessage message)
         {
             string content = message.Content.Remove(0, 6).TrimStart().TrimEnd();

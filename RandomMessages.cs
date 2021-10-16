@@ -24,7 +24,9 @@ namespace DiscordBotDURAK
             "сос",
             "как",
             "чт",
-            "по"
+            "по",
+            "бот",
+            "bot"
         };
         private static List<string> _botResponses = new()
         {

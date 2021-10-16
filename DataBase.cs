@@ -51,7 +51,8 @@ namespace DiscordBotDURAK
                     adminsId = reader.GetString(0);
                 }
             }
-            return adminsId.Split(' ');
+            return adminsId?.Split(' ');
+            
         }
         public static string[] Get(string guildId)
         {

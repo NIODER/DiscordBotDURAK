@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace Constants
 {
@@ -12,6 +8,7 @@ namespace Constants
         public static readonly string logPath = @"E:\log.TXT";
         public static readonly string tokenPath = @"E:\TOKEN.txt";
         public static readonly string tabulation = "\n__________________________________________\n";
+        public static readonly string helpPath = @"E:\MyProgs\Home\c sharp\DiscordBotDURAK\helpMessage.txt";
     }
 
     public static class Commands
@@ -21,6 +18,10 @@ namespace Constants
         public static readonly string moderate = "$moderate"; 
         public static readonly string clean = "$clean"; 
         public static readonly string decide = "реши"; 
-        public static readonly string id = "$ID"; 
+        public static readonly string id = "$ID";
+        public static readonly string giveAdmin = "$admin";
+        public static readonly string help = "$help";
+        public static readonly string deleteAdmin = "$delete";
+        public static readonly string commandsHelp = new StreamReader(File.OpenRead(Constants.helpPath)).ReadToEnd();
     }
 }

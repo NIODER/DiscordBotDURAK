@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SqlClient;
 
 namespace DiscordBotDURAK
@@ -13,13 +11,13 @@ namespace DiscordBotDURAK
         /// <summary>
         /// Добавляет id админа в БД, если его там еще нет.
         /// </summary>
-        /// <param name="guildId"></param>
-        /// <param name="adminId"></param>
+        /// <param name="guildId">Id of guild</param>
+        /// <param name="adminId">Id of admin</param>
         public static void Add(ulong ulongguildId, ulong ulongadminId)
         {
             string guildId = Convert.ToString(ulongguildId);
             string adminId = Convert.ToString(ulongadminId);
-            string sqlExpression = $"INSERT INTO [DiscordBotDURAKDataBase].[dbo].[IdTable] ([GuildId], [Admins]) VALUE ('{guildId}', '{adminId}')";
+            string sqlExpression = $"INSERT INTO [DiscordBotDURAKDataBase].[dbo].[IdTable] ([GuildId], [Admins]) VALUES ('{guildId}', '{adminId}')";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 if (!Search(guildId, adminId))
@@ -31,32 +29,14 @@ namespace DiscordBotDURAK
             }
         }
         /// <summary>
-        /// Вытаскивает всех админов из БД
+        /// Get all admins from DB
         /// </summary>
-        /// <param name="guildId"></param>
-        /// <returns>Возвращает строку с id всех админов</returns>
-        public static string[] Get(ulong ulongguildId)
+        /// <param name="guildId">Id of guild</param>
+        /// <returns>IEnumerable<string> adminsId</returns>
+        public static IEnumerable<string> Get(ulong ulongguildId)
         {
             string guildId = Convert.ToString(ulongguildId);
-            string adminsId = null;
-            string sqlExpression = $"SELECT Admins FROM IdTable WHERE GuildId = '{guildId}'";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-                SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    adminsId = reader.GetString(0);
-                }
-            }
-            return adminsId?.Split(' ');
-            
-        }
-        public static string[] Get(string guildId)
-        {
-            string adminsId = null;
+            string admins = "";
             string sqlExpression = $"SELECT Admins FROM [DiscordBotDURAKDataBase].[dbo].[IdTable] WHERE GuildId = '{guildId}'";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -64,26 +44,85 @@ namespace DiscordBotDURAK
                 connection.Open();
                 SqlCommand command = new SqlCommand(sqlExpression, connection);
                 SqlDataReader reader = command.ExecuteReader();
-                adminsId = reader.GetString(1);
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        admins = admins + reader.GetString(0) + " ";
+                    }
+                }
+                
             }
-            return adminsId.Split(' ');
+            admins = admins.Trim();
+            if (admins == "")
+            {
+                return null;
+            }
+            else
+            {
+                IEnumerable<string> adminsId = admins.Split(' ');
+                return adminsId;
+            }
         }
-        private static bool Search(string guildId, string adminId) => Get(guildId).Contains(adminId);
-        public static bool Search(ulong ulongguildId)
+        /// <summary>
+        /// Get all admins from DB
+        /// </summary>
+        /// <param name="guildId">Id of guild</param>
+        /// <returns>IEnumerable<string> adminsId</returns>
+        public static IEnumerable<string> Get(string guildId)
         {
-            string guildId = Convert.ToString(ulongguildId);
-            string sqlExpression = $"SELECT GuildId FROM [DiscordBotDURAKDataBase].[dbo].[IdTable]";
+            string admins = "";
+            string sqlExpression = $"SELECT Admins FROM [DiscordBotDURAKDataBase].[dbo].[IdTable] WHERE GuildId = '{guildId}'";
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
                 SqlCommand command = new SqlCommand(sqlExpression, connection);
                 SqlDataReader reader = command.ExecuteReader();
-                while (reader.HasRows)
+                if (reader.HasRows)
                 {
-                    if (reader.GetString(0) == guildId)
+                    while (reader.Read())
                     {
-                        return true;
+                        admins = admins + reader.GetString(0) + " ";
                     }
+                }
+
+            }
+            admins = admins.Trim();
+            if (admins == "")
+            {
+                return null;
+            }
+            else
+            {
+                IEnumerable<string> adminsId = admins.Split(' ');
+                return adminsId;
+            }
+        }
+        /// <summary>
+        /// Search admin in DB
+        /// </summary>
+        /// <param name="guildId">Id of the guild</param>
+        /// <param name="adminId">Id of admin</param>
+        /// <returns>true if admin was found in DB</returns>
+        private static bool Search(string guildId, string adminId) => Get(guildId)?.Contains(adminId) ?? false;
+        /// <summary>
+        /// Search guild in DB
+        /// </summary>
+        /// <param name="ulongguildId">Id of guild</param>
+        /// <returns>true if guild was found in DB</returns>
+        public static bool Search(ulong ulongguildId)
+        {
+            string guildId = Convert.ToString(ulongguildId);
+            string sqlExpression = $"SELECT GuildId FROM [DiscordBotDURAKDataBase].[dbo].[IdTable] WHERE GuildId = '{guildId}'";
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand(sqlExpression, connection);
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    return true;
                 }
                 return false;
             }

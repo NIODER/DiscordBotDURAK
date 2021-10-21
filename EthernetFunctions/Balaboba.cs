@@ -46,9 +46,6 @@ namespace EthernetFunctons.Balaboba
                 Console.WriteLine($"   error : {response.error}");
                 Console.WriteLine($"   query : {response.query}");
                 Console.WriteLine($"   text : {response.text}");
-                Console.WriteLine();
-                Console.WriteLine("_________________________________________");
-                Console.WriteLine();
             }
         }
 

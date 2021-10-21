@@ -121,6 +121,7 @@ namespace DiscordBotDURAK
                 if (!DataBase.Search(guild.Id))
                 {
                     DataBase.Add(guild.Id, guild.OwnerId);
+                    _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Add guild \"{guild.Name}\" in DB"));
                 }
             }
         }
@@ -166,7 +167,7 @@ namespace DiscordBotDURAK
             {
                 await message.Channel.DeleteMessageAsync(message.Id);
             }
-            Console.WriteLine($"{DateTime.Now}\nУдалено сообщение\n{message.Id}\n{message.Content}{Constants.Constants.tabulation}");
+            await Log(new(LogSeverity.Info, Sources.internal_function, "Message deleted"));
         }
 
         #endregion
@@ -179,13 +180,16 @@ namespace DiscordBotDURAK
             {
                 return;
             }
+            string admins = null;
             ulong adminId;
             ulong guildId = ((SocketGuildChannel)message.Channel).Guild.Id;
             foreach (var user in message.MentionedUsers)
             {
                 adminId = user.Id;
                 DataBase.Add(guildId, adminId);
+                admins = admins.Insert(admins.Length, user.Username + " ");
             }
+            _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Gave admin to {admins}"));
         }
 
         private void CommandsHelp(SocketMessage message)
@@ -197,7 +201,7 @@ namespace DiscordBotDURAK
         {
             await message.Channel.SendMessageAsync(
                 $"{message.Author.Username}, Артему сегодня повезло, выпало число {new Random().Next(-1000, 1000)}");
-            Console.WriteLine($"{DateTime.Now}\nОтработал рандом{Constants.Constants.tabulation}");
+            await Log(new(LogSeverity.Info, Sources.command, "Random has been randomed"));
         }
 
         private async void Desider(SocketMessage message)
@@ -210,7 +214,7 @@ namespace DiscordBotDURAK
             {
                 await message.Channel.SendMessageAsync($"{message.Author.Username}, Нет");
             }
-            Console.WriteLine($"{DateTime.Now}\nБот принял решение{Constants.Constants.tabulation}");
+            await Log(new(LogSeverity.Info, Sources.command, "Bot desided"));
         }
 
         private async void SPAM_Func(SocketMessage message)
@@ -245,7 +249,7 @@ namespace DiscordBotDURAK
             {
                 await message.Channel.SendMessageAsync("Нихрена не понимаю ни одного слова");
             }
-            Console.WriteLine($"{DateTime.Now}\nПроспамлено {word} {counter} раз{Constants.Constants.tabulation}");
+            await Log(new(LogSeverity.Info, Sources.command, $"{word} spammed {counter} times"));
             //Clear(message, msg[0]+msg[1]);
         }
 
@@ -281,7 +285,7 @@ namespace DiscordBotDURAK
                     return;
                 }
                 await channel.SendMessageAsync($"<@{autorId}>: \n\"{content}\"");
-                Console.WriteLine($"{DateTime.Now}\nПереслано сообщение от {message.Author.Username}.{Constants.Constants.tabulation}");
+                await Log(new(LogSeverity.Info, Sources.command, $"Message from {message.Author.Username} has been redirected"));
             }
         }
 
@@ -290,7 +294,7 @@ namespace DiscordBotDURAK
             string id = Convert.ToString(message.Author.Id);
             await message.Author.SendMessageAsync($"Твой ID: {id}");
             await DeleteMessageAsync(message, enableTimer: false);
-            Console.WriteLine($"{DateTime.Now}\nОтправлено ID {message.Author.Username}.{Constants.Constants.tabulation}");
+            await Log(new(LogSeverity.Info, Sources.command, $"ID send { message.Author.Username }"));
         }
 
         private async void Clear(SocketMessage message, string command = "")
@@ -307,7 +311,7 @@ namespace DiscordBotDURAK
                     }
                 }
             }
-            Console.WriteLine($"{DateTime.Now}\nЧистин отработал в канале {message.Channel.Name}{Constants.Constants.tabulation}");
+            await Log(new(LogSeverity.Info, Sources.command, $"Cleaned channel {message.Channel.Name}"));
         }
 
         private async void Moderate(SocketMessage message)

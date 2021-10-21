@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Discord;
 
 namespace Constants
 {
@@ -9,6 +10,12 @@ namespace Constants
         public static readonly string tokenPath = @"E:\TOKEN.txt";
         public static readonly string tabulation = "\n__________________________________________\n";
         public static readonly string helpPath = @"E:\MyProgs\Home\c sharp\DiscordBotDURAK\helpMessage.txt";
+    }
+
+    public static class Sources
+    {
+        public static readonly string command = "Command";
+        public static readonly string internal_function = "Internal";
     }
 
     public static class Commands

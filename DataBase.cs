@@ -27,6 +27,7 @@ namespace DiscordBotDURAK
                     command.ExecuteNonQuery();
                 }
             }
+            
         }
         /// <summary>
         /// Get all admins from DB

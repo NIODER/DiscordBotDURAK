@@ -261,6 +261,10 @@ namespace DiscordBotDURAK
 
         private async void RefModeration(IMessage message)
         {
+            if (message.Channel.Id == 713693435214692362)
+            {
+                return;
+            }
             if (message.Content.Contains("http"))
             {
                 if (message.Content.Contains("gfycat"))
@@ -292,7 +296,7 @@ namespace DiscordBotDURAK
         private async void SendId(SocketMessage message)
         {
             string id = Convert.ToString(message.Author.Id);
-            await message.Author.SendMessageAsync($"Твой ID: {id}");
+            await message.Author.SendMessageAsync($"Твой ID: {id}, id канала {message.Channel.Id}");
             await DeleteMessageAsync(message, enableTimer: false);
             await Log(new(LogSeverity.Info, Sources.command, $"ID send { message.Author.Username }"));
         }

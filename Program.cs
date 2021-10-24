@@ -50,6 +50,11 @@ namespace DiscordBotDURAK
               {
                   if (!message.Author.IsBot)
                   {
+                      if (message.Content.StartsWith(Commands.search))
+                      {
+                          SearchMessages(message);
+                      }
+
                       if (message.Content.StartsWith(Commands.help))
                       {
                           CommandsHelp(message);
@@ -108,7 +113,7 @@ namespace DiscordBotDURAK
             return Task.CompletedTask;
         }
 
-        #region common functions
+        #region internal
 
         /// <summary>
         /// Add new guild in DB if its wasn't already there
@@ -118,9 +123,9 @@ namespace DiscordBotDURAK
         {
             foreach (var guild in guilds)
             {
-                if (!DataBase.Search(guild.Id))
+                if (!DataBase.SearchGuildIDB(guild.Id))
                 {
-                    DataBase.Add(guild.Id, guild.OwnerId);
+                    DataBase.AddAdminIDB(guild.Id, guild.OwnerId);
                     _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Add guild \"{guild.Name}\" in DB"));
                 }
             }
@@ -134,7 +139,7 @@ namespace DiscordBotDURAK
         private bool CheckAdmin(SocketMessage message)
         {
             SocketGuildChannel channel = (SocketGuildChannel)message.Channel;
-            IEnumerable<string> adminCollection = DataBase.Get(channel.Guild.Id);
+            IEnumerable<string> adminCollection = DataBase.GetAdminsFDB(channel.Guild.Id);
 
             if (adminCollection == null)
             {
@@ -152,7 +157,13 @@ namespace DiscordBotDURAK
                 return false;
             }
         }
-
+        /// <summary>
+        /// Deletes message
+        /// </summary>
+        /// <param name="message">Message</param>
+        /// <param name="enableTimer">true enables timer</param>
+        /// <param name="timer">value of timer </param>
+        /// <returns></returns>
         private async Task DeleteMessageAsync(SocketMessage message, bool enableTimer, int timer = 30000)
         {
             if (enableTimer)
@@ -172,7 +183,32 @@ namespace DiscordBotDURAK
 
         #endregion
 
-        #region BOT FUNCTIONS
+        #region functions
+
+        private async void SearchMessages(SocketMessage message)
+        {
+            string content = message.Content.Remove(0, Commands.search.Length).Trim().TrimEnd();
+            ISocketMessageChannel channel = message.Channel;
+            IAsyncEnumerable<IReadOnlyCollection<IMessage>> EnumMessages = channel.GetMessagesAsync(1000);
+            List<IMessage> findMessages = new();
+            await foreach (var messages in EnumMessages)
+            {
+                foreach (var msg in messages)
+                {
+                    if (msg.Content.Contains(content))
+                    {
+                        findMessages.Add(msg);
+                    }
+                }
+            }
+            foreach (var msg in findMessages)
+            {
+                await channel.SendMessageAsync(
+                    $"Автор: {msg.Author.Username}\n" +
+                    $"Отправлено {msg.CreatedAt.DateTime}\n" +
+                    $"Содержание: {msg.Content}");
+            }
+        }
 
         private void GiveAdmin(SocketMessage message)
         {
@@ -186,7 +222,7 @@ namespace DiscordBotDURAK
             foreach (var user in message.MentionedUsers)
             {
                 adminId = user.Id;
-                DataBase.Add(guildId, adminId);
+                DataBase.AddAdminIDB(guildId, adminId);
                 admins = admins.Insert(admins.Length, user.Username + " ");
             }
             _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Gave admin to {admins}"));

@@ -13,14 +13,14 @@ namespace DiscordBotDURAK
         /// </summary>
         /// <param name="guildId">Id of guild</param>
         /// <param name="adminId">Id of admin</param>
-        public static void Add(ulong ulongguildId, ulong ulongadminId)
+        public static void AddAdminIDB(ulong ulongguildId, ulong ulongadminId)
         {
             string guildId = Convert.ToString(ulongguildId);
             string adminId = Convert.ToString(ulongadminId);
             string sqlExpression = $"INSERT INTO [DiscordBotDURAKDataBase].[dbo].[IdTable] ([GuildId], [Admins]) VALUES ('{guildId}', '{adminId}')";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                if (!Search(guildId, adminId))
+                if (!SearchAdminIDB(guildId, adminId))
                 {
                     connection.Open();
                     SqlCommand command = new SqlCommand(sqlExpression, connection);
@@ -34,7 +34,7 @@ namespace DiscordBotDURAK
         /// </summary>
         /// <param name="guildId">Id of guild</param>
         /// <returns>IEnumerable<string> adminsId</returns>
-        public static IEnumerable<string> Get(ulong ulongguildId)
+        public static IEnumerable<string> GetAdminsFDB(ulong ulongguildId)
         {
             string guildId = Convert.ToString(ulongguildId);
             string admins = "";
@@ -70,7 +70,7 @@ namespace DiscordBotDURAK
         /// </summary>
         /// <param name="guildId">Id of guild</param>
         /// <returns>IEnumerable<string> adminsId</returns>
-        public static IEnumerable<string> Get(string guildId)
+        public static IEnumerable<string> GetAdminsFDB(string guildId)
         {
             string admins = "";
             string sqlExpression = $"SELECT Admins FROM [DiscordBotDURAKDataBase].[dbo].[IdTable] WHERE GuildId = '{guildId}'";
@@ -106,13 +106,13 @@ namespace DiscordBotDURAK
         /// <param name="guildId">Id of the guild</param>
         /// <param name="adminId">Id of admin</param>
         /// <returns>true if admin was found in DB</returns>
-        private static bool Search(string guildId, string adminId) => Get(guildId)?.Contains(adminId) ?? false;
+        private static bool SearchAdminIDB(string guildId, string adminId) => GetAdminsFDB(guildId)?.Contains(adminId) ?? false;
         /// <summary>
         /// Search guild in DB
         /// </summary>
         /// <param name="ulongguildId">Id of guild</param>
         /// <returns>true if guild was found in DB</returns>
-        public static bool Search(ulong ulongguildId)
+        public static bool SearchGuildIDB(ulong ulongguildId)
         {
             string guildId = Convert.ToString(ulongguildId);
             string sqlExpression = $"SELECT GuildId FROM [DiscordBotDURAKDataBase].[dbo].[IdTable] WHERE GuildId = '{guildId}'";

@@ -29,6 +29,7 @@ namespace Constants
         public static readonly string giveAdmin = "$admin";
         public static readonly string help = "$help";
         public static readonly string deleteAdmin = "$delete";
+        public static readonly string search = "$search";
         public static readonly string commandsHelp = new StreamReader(File.OpenRead(Constants.helpPath)).ReadToEnd();
     }
 }

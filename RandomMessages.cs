@@ -8,27 +8,19 @@ namespace DiscordBotDURAK
 {
     static class RandomMessages
     {
-        private static List<string> _triggers = new()
+        private static readonly List<string> _triggers = new()
         {
-            "слыш",
             "код",
             "прог",
-            "хуй",
-            "гов",
             "кирил",
-            "пис",
             "дурак",
             "?",
-            "шиз",
-            "сук",
             "сос",
-            "как",
             "чт",
-            "по",
             "бот",
             "bot"
         };
-        private static List<string> _botResponses = new()
+        private static readonly List<string> _botResponses = new()
         {
             "Слишком много стеба, слишком много мата...",
             "Не груби людям, ок?",
@@ -38,7 +30,7 @@ namespace DiscordBotDURAK
             "понятно..",
             "(я его не знаю)"
         };
-        private static List<string> _supplements = new()
+        private static readonly List<string> _supplements = new()
         {
             "Как говорил мой дед, ",
             "У тебя к спине приклеилась записка, там написано: \n",
@@ -53,10 +45,6 @@ namespace DiscordBotDURAK
         public static string GetSupplement() => _supplements[new Random().Next(_supplements.Count)];
 
         public static string RandomResponse() => _botResponses[new Random().Next(_botResponses.Count)];
-
-        public static void AddResponse(string msg) => _botResponses.Add(msg);
-
-        public static void AddSupplement(string msg) => _supplements.Add(msg);
 
         public static bool TriggerCheck(string msg)
         {

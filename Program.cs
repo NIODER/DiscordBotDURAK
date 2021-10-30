@@ -43,77 +43,111 @@ namespace DiscordBotDURAK
 
         private Task CommandsHandler(SocketMessage message)
         {
-            if ((message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0) && message.Author.Id != 881591057953992724)
-                _ = DeleteMessageAsync(message, enableTimer: true);
+            CheckGuilds(client.Guilds);
+            if (CheckChannel(message))
+            {
+                if ((message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0))
+                {
+                    _ = DeleteMessageAsync(message, enableTimer: true);
+                }
 
-            _ = Task.Run(() =>
-              {
-                  if (!message.Author.IsBot)
+                _ = Task.Run(() =>
                   {
-                      if (message.Content.StartsWith(Commands.search))
+                      if (!message.Author.IsBot)
                       {
-                          SearchMessages(message);
-                      }
-
-                      if (message.Content.StartsWith(Commands.help))
-                      {
-                          CommandsHelp(message);
-                      }
-
-                      if (message.Content.ToLower().StartsWith(Commands.random))
-                      {
-                          RAND_Func(message);
-                      }
-
-                      if (message.Content.ToLower().Contains(Commands.decide))
-                      {
-                          Desider(message);
-                      }
-
-                      if (message.Content == Commands.id)
-                      {
-                          SendId(message);
-                      }
-
-                      if (RandomMessages.TriggerCheck(message.Content.ToLower()))
-                      {
-                          SHITPOST_Func(message);
-                      }
-
-                      if (message.Content.Contains("http"))
-                      {
-                          RefModeration(message);
-                      }
-
-                      if (CheckAdmin(message))
-                      {
-                          if (message.Content.ToLower().StartsWith(Commands.spam))
+                          if (message.Content.StartsWith(Commands.search))
                           {
-                              SPAM_Func(message);
+                              SearchMessages(message);
                           }
 
-                          if (message.Content.ToLower().StartsWith(Commands.moderate))
+                          if (message.Content.StartsWith(Commands.help))
                           {
-                              Moderate(message);
+                              CommandsHelp(message);
                           }
 
-                          if (message.Content.ToLower().Contains(Commands.clean))
+                          if (message.Content.ToLower().StartsWith(Commands.random))
                           {
-                              Clear(message, Commands.clean);
+                              RAND_Func(message);
                           }
 
-                          if (message.Content.StartsWith(Commands.giveAdmin))
+                          if (message.Content.ToLower().Contains(Commands.decide))
                           {
-                              GiveAdmin(message);
+                              Desider(message);
+                          }
+
+                          if (message.Content == Commands.id)
+                          {
+                              SendId(message);
+                          }
+
+                          if (RandomMessages.TriggerCheck(message.Content.ToLower()))
+                          {
+                              SHITPOST_Func(message);
+                          }
+
+                          if (message.Content.Contains("http"))
+                          {
+                              RefModeration(message);
+                          }
+
+                          if (CheckAdmin(message))
+                          {
+                              if (message.Content.ToLower() == Commands.owner)
+                              {
+                                  OwnerHelp(message);
+                              }
+
+                              if (message.Content.StartsWith(Commands.setChannelType))
+                              {
+                                  SetChannelType(message);
+                              }
+
+                              if (message.Content.ToLower().StartsWith(Commands.spam))
+                              {
+                                  SPAM_Func(message);
+                              }
+
+                              if (message.Content.ToLower().StartsWith(Commands.delete))
+                              {
+                                  DeleteFunc(message);
+                              }
+
+                              if (message.Content.ToLower().StartsWith(Commands.moderate))
+                              {
+                                  Moderate(message);
+                              }
+
+                              if (message.Content.ToLower().Contains(Commands.clean))
+                              {
+                                  Clear(message, Commands.clean);
+                              }
+
+                              if (message.Content.StartsWith(Commands.giveAdmin))
+                              {
+                                  GiveAdmin(message);
+                              }
                           }
                       }
-                  }
-                  CheckGuilds(client.Guilds);
-              });
+                  });
+            }
             return Task.CompletedTask;
         }
 
         #region internal
+
+        /// <summary>
+        /// Check if bot can moderate this channel
+        /// </summary>
+        /// <param name="message">message</param>
+        /// <returns>true if bot can moderate this channel</returns>
+        private bool CheckChannel(SocketMessage message)
+        {
+            if (!CheckGuild(message))
+            {
+                AddGuildInDB(message);
+            }
+            return DataBase.GetChannelType(message.Channel.Id) != ChannelSeverity.None;
+        }
 
         /// <summary>
         /// Add new guild in DB if its wasn't already there
@@ -127,10 +161,78 @@ namespace DiscordBotDURAK
                 {
                     DataBase.AddAdminIDB(guild.Id, guild.OwnerId);
                     _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Add guild \"{guild.Name}\" in DB"));
+                    var channels = guild.Channels;
+                    foreach (var channel in channels)
+                    {
+                        DataBase.AddChannelInDB(guild.Id, channel.Id);
+                        _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Add channel \"{channel.Name}\" in DB"));
+                    }
                 }
             }
         }
 
+        private void AddGuildInDB(SocketMessage message)
+        {
+            SocketGuild guild = ((SocketGuildChannel)message.Channel).Guild;
+            DataBase.AddAdminIDB(guild.Id, guild.OwnerId);
+            _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Add guild \"{guild.Name}\" in DB"));
+            var channels = guild.Channels;
+            foreach (var channel in channels)
+            {
+                DataBase.AddChannelInDB(guild.Id, channel.Id);
+                _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Add channel \"{channel.Name}\" in DB"));
+            }
+            Hello(guild.Owner);
+        }
+
+        private async void Hello(SocketGuildUser owner)
+        {
+            await owner.SendMessageAsync("Привет, я бот-дурак, ты владелец сервера, давай дружить!");
+            await owner.SendMessageAsync("Сейчас ты - единственный и неповторимы админ для меня на этом сервере) " +
+                "нужно будет добавить еще админов(если хочешь) и обязательно настроить чаты! Когда захочешь это сделать " +
+                "напиши мне команду $owner (будет много букв, но я верю в тебя)");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns>true if guild was found in DB</returns>
+        private bool CheckGuild(SocketMessage message)
+        {
+            ulong guildId = ((SocketGuildChannel)message.Channel).Guild.Id;
+            return DataBase.SearchGuildIDB(guildId);
+        }
+
+        /// <summary>
+        /// Sets a channel type
+        /// </summary>
+        /// <param name="message">message</param>
+        private void SetChannelType(SocketMessage message)
+        {
+            string msg = message.Content.Substring(Commands.setChannelType.Length).Trim().TrimEnd();
+            int severity = Convert.ToInt32(msg.Split(' ')[1]);
+            string mention = msg.Split(' ')[0];
+            ulong id;
+            if (mention.StartsWith("<#") && mention.EndsWith(">"))
+            {
+                id = Convert.ToUInt64(mention.Remove(0,2).Remove(18));
+            }
+            else
+            {
+                message.Channel.SendMessageAsync("Неправильно упомянут канал, канал упоминается в формате # + название канала");
+                return;
+            }
+            if (Enum.IsDefined(typeof(ChannelSeverity), severity))
+            {
+                DataBase.AddChannelType(id, (ChannelSeverity)severity);
+            }
+            else
+            {
+                message.Channel.SendMessageAsync("Неправильно указан тип канала");
+            }
+        }
+        
         /// <summary>
         /// Check if message author is admin
         /// </summary>
@@ -168,7 +270,7 @@ namespace DiscordBotDURAK
         {
             if (enableTimer)
             {
-                if (message.Channel.Id != 720193176463343666)
+                if (DataBase.GetChannelType(message.Channel.Id) != ChannelSeverity.None || DataBase.GetChannelType(message.Channel.Id) != ChannelSeverity.References)
                 {
                     await Task.Delay(timer);
                     await message.Channel.DeleteMessageAsync(message.Id);
@@ -184,6 +286,12 @@ namespace DiscordBotDURAK
         #endregion
 
         #region functions
+
+        private async void OwnerHelp(SocketMessage message)
+        {
+            string msg = new StreamReader(File.OpenRead(Constants.Constants.ownerMessagePath)).ReadToEnd();
+            await message.Author.SendMessageAsync(msg);
+        }
 
         private async void SearchMessages(SocketMessage message)
         {
@@ -216,7 +324,7 @@ namespace DiscordBotDURAK
             {
                 return;
             }
-            string admins = null;
+            string admins = " ";
             ulong adminId;
             ulong guildId = ((SocketGuildChannel)message.Channel).Guild.Id;
             foreach (var user in message.MentionedUsers)
@@ -225,7 +333,7 @@ namespace DiscordBotDURAK
                 DataBase.AddAdminIDB(guildId, adminId);
                 admins = admins.Insert(admins.Length, user.Username + " ");
             }
-            _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Gave admin to {admins}"));
+            _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Gave admin to{admins}"));
         }
 
         private void CommandsHelp(SocketMessage message)
@@ -255,7 +363,7 @@ namespace DiscordBotDURAK
 
         private async void SPAM_Func(SocketMessage message)
         {
-            if (message.Channel.Id == 720193176463343666)
+            if (message.Channel.Id == DataBase.GetReferenceChannel(((SocketGuildChannel)message.Channel).Guild.Id))
             {
                 _ = message.Channel.SendMessageAsync("отказано");
                 return;
@@ -295,9 +403,23 @@ namespace DiscordBotDURAK
                 $"{message.Author.Username}, {Balaboba.Say(message.Content)}");
         }
 
+        private async void DeleteFunc(SocketMessage message)
+        {
+            int counter = Convert.ToInt32(message.Content.Substring(Commands.delete.Length).Trim().TrimEnd());
+            var messages = message.Channel.GetMessagesAsync(counter);
+            await foreach (var msg in messages)
+            {
+                foreach (var message1 in msg)
+                {
+                    await message1.DeleteAsync();
+                }
+            }
+        }
+
         private async void RefModeration(IMessage message)
         {
-            if (message.Channel.Id == 713693435214692362)
+            ulong referenceChannelId = DataBase.GetReferenceChannel(((SocketGuildChannel)message.Channel).Guild.Id);
+            if (message.Channel.Id == referenceChannelId)
             {
                 return;
             }
@@ -316,7 +438,7 @@ namespace DiscordBotDURAK
                 ulong autorId = message.Author.Id;
                 string content = message.Content;
                 await message.DeleteAsync();
-                ISocketMessageChannel channel = (ISocketMessageChannel)client.GetChannel(720193176463343666);
+                ISocketMessageChannel channel = (ISocketMessageChannel)client.GetChannel(referenceChannelId);
                 if (message.Content.ToLower().Contains("разд") || message.Content.ToLower().Contains("нитро") || message.Content.ToLower().Contains("nitro"))
                 {
                     await channel.SendMessageAsync($"Вероятно, это очередной скам \n ||{content}||");

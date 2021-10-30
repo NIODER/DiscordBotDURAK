@@ -10,6 +10,7 @@ namespace Constants
         public static readonly string tokenPath = @"E:\TOKEN.txt";
         public static readonly string tabulation = "\n__________________________________________\n";
         public static readonly string helpPath = @"E:\MyProgs\Home\c sharp\DiscordBotDURAK\helpMessage.txt";
+        public static readonly string ownerMessagePath = @"E:\MyProgs\Home\c sharp\DiscordBotDURAK\ownerMessage.txt";
     }
 
     public static class Sources
@@ -20,6 +21,9 @@ namespace Constants
 
     public static class Commands
     {
+        public static readonly string owner = "$owner";
+        public static readonly string setChannelType = "$set";
+        public static readonly string delete = "$delete";
         public static readonly string random = "$random"; 
         public static readonly string spam = "$spam"; 
         public static readonly string moderate = "$moderate"; 

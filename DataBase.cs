@@ -13,10 +13,10 @@ namespace DiscordBotDURAK
         /// </summary>
         /// <param name="guildId">Id of guild</param>
         /// <param name="adminId">Id of admin</param>
-        public static void AddAdminIDB(ulong ulongguildId, ulong ulongadminId)
+        public static void AddAdminIDB(ulong ulongGuildId, ulong ulongAdminId)
         {
-            string guildId = Convert.ToString(ulongguildId);
-            string adminId = Convert.ToString(ulongadminId);
+            string guildId = Convert.ToString(ulongGuildId);
+            string adminId = Convert.ToString(ulongAdminId);
             string sqlExpression = $"INSERT INTO [DiscordBotDURAKDataBase].[dbo].[IdTable] ([GuildId], [Admins]) VALUES ('{guildId}', '{adminId}')";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -84,7 +84,7 @@ namespace DiscordBotDURAK
                 {
                     while (reader.Read())
                     {
-                        admins = admins + reader.GetString(0) + " ";
+                        admins += reader.GetString(0) + " ";
                     }
                 }
 
@@ -115,7 +115,7 @@ namespace DiscordBotDURAK
         public static bool SearchGuildIDB(ulong ulongguildId)
         {
             string guildId = Convert.ToString(ulongguildId);
-            string sqlExpression = $"SELECT GuildId FROM [DiscordBotDURAKDataBase].[dbo].[IdTable] WHERE GuildId = '{guildId}'";
+            string sqlExpression = $"SELECT GuildId FROM [DiscordBotDURAKDataBase].[dbo].[Channels] WHERE GuildId = '{guildId}'";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
@@ -125,7 +125,159 @@ namespace DiscordBotDURAK
                 {
                     return true;
                 }
-                return false;
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        /// <summary>
+        /// Adds a channel id DB
+        /// </summary>
+        /// <param name="ulongGuildID">guild id</param>
+        /// <param name="ulongChannelID">channel id</param>
+        /// <param name="severity">channel severity</param>
+        public static void AddChannelInDB(ulong ulongGuildID, ulong ulongChannelID, ChannelSeverity severity)
+        {
+            string channelId = Convert.ToString(ulongChannelID);
+            string guildId = Convert.ToString(ulongGuildID);
+            string sqlExpression =
+                $"INSERT INTO [DiscordBotDURAKDataBase].[dbo].[Channels] " +
+                $"(GuildId, ChannelId, [Type]) VALUES ('{guildId}', '{channelId}', '{severity}')";
+            using (SqlConnection connection = new(connectionString))
+            {
+                if (!SearchChannelInDB(ulongChannelID))
+                {
+                    connection.Open();
+                    SqlCommand command = new(sqlExpression, connection);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        /// <summary>
+        /// Adds a channel id DB with flood type
+        /// </summary>
+        /// <param name="ulongGuildID">guild id</param>
+        /// <param name="ulongChannelID">channel id</param>
+        public static void AddChannelInDB(ulong ulongGuildID, ulong ulongChannelID)
+        {
+            string channelId = Convert.ToString(ulongChannelID);
+            string guildId = Convert.ToString(ulongGuildID);
+            string sqlExpression =
+                $"INSERT INTO [DiscordBotDURAKDataBase].[dbo].[Channels] " +
+                $"(GuildId, ChannelId, [Type]) VALUES ('{guildId}', '{channelId}', '{ChannelSeverity.Flood}')";
+            using (SqlConnection connection = new(connectionString))
+            {
+                if (!SearchChannelInDB(ulongChannelID))
+                {
+                    connection.Open();
+                    SqlCommand command = new(sqlExpression, connection);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        public static ChannelSeverity GetChannelType(ulong ulongChannelId)
+        {
+            string channelId = Convert.ToString(ulongChannelId);
+            string sqlExpression = $"SELECT [Type] FROM [DiscordBotDURAKDataBase].[dbo].[Channels] WHERE ChannelId = '{channelId}'";
+
+            using (SqlConnection connection = new(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new(sqlExpression, connection);
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    string severity = reader.GetString(0);
+                    return (ChannelSeverity)Enum.Parse(typeof(ChannelSeverity), severity);
+                }
+                else
+                {
+                    throw new Exception("No such a channel in DB"); 
+                }
+        }
+        }
+        public static ulong GetReferenceChannel(ulong ulongGuildId)
+        {
+            string guildId = Convert.ToString(ulongGuildId);
+            string sqlExpression =
+                $"SELECT [ChannelId] FROM [DiscordBotDURAKDataBase].[dbo].[Channels] " +
+                $"WHERE [GuildId] = '{guildId}' AND [Type] = '{ChannelSeverity.References}'";
+            using (SqlConnection connection = new(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new(sqlExpression, connection);
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return Convert.ToUInt64(reader.GetString(0));
+                }
+                else
+                {
+                    throw new Exception("No such a channel in DB");
+                }
+            }
+        }
+        /// <summary>
+        /// Adds type to the channel
+        /// </summary>
+        /// <param name="ulongChannelId">channel id</param>
+        /// <param name="severity">type of channel</param>
+        public static void AddChannelType(ulong ulongChannelId, ChannelSeverity severity)
+        {
+            string channelId = Convert.ToString(ulongChannelId);
+            string sqlExpression =
+                $"UPDATE [DiscordBotDURAKDataBase].[dbo].[Channels] " +
+                $"SET [Type] = '{severity}' WHERE ChannelId = '{channelId}'";
+            using (SqlConnection connection = new(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new(sqlExpression, connection);
+                command.ExecuteNonQuery();
+            }
+        }
+        /// <summary>
+        /// Deletes a channel from DB
+        /// </summary>
+        /// <param name="ulongChannelId">channel id</param>
+        public static void DeleteChannelFDB(ulong ulongChannelId)
+        {
+            string channelId = Convert.ToString(ulongChannelId);
+            string sqlExpression =
+                $"DELETE FROM [DiscordBotDURAKDataBase].[dbo].[Channels] WHERE ChannelId = '{channelId}'";
+            using (SqlConnection connection = new(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new(sqlExpression, connection);
+                command.ExecuteNonQuery();
+            }
+        }
+        /// <summary>
+        /// Search a channel in DB
+        /// </summary>
+        /// <param name="ulongChannelID">channel id</param>
+        /// <returns>true if channel is already in DB</returns>
+        public static bool SearchChannelInDB(ulong ulongChannelID)
+        {
+            string channelId = Convert.ToString(ulongChannelID);
+            string sqlExpression =
+                $"SELECT TOP (1000) [GuildID]" +
+                $", [ChannelId]" +
+                $", [Type]" +
+                $" FROM [DiscordBotDURAKDataBase].[dbo].[Channels] WHERE ChannelId = '{channelId}'";
+            using (SqlConnection connection = new(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new(sqlExpression, connection);
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }

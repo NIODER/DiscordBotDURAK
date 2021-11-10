@@ -280,5 +280,46 @@ namespace DiscordBotDURAK
                 }
             }
         }
+        /// <summary>
+        /// Get All guild ids from DB
+        /// </summary>
+        /// <returns>list of ids</returns>
+        public static IEnumerable<ulong> GetAll()
+        {
+            List<ulong> all = new List<ulong>();
+            string sqlExpression = "SELECT GuildId FROM DiscordBotDURAKDataBase.dbo.IdTable";
+            using (SqlConnection connection = new(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new(sqlExpression, connection);
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        var str = reader.GetString(0);
+                        all.Add(Convert.ToUInt64(str));
+                    }
+                }
+            }
+            return all;
+        }
+        public static void DeleteGuilds(IReadOnlyCollection<ulong> guilds)
+        {
+            foreach (var guildId in guilds)
+            {
+                string sqlExpression1 = $"DELETE FROM DiscordBotDURAKDataBase.dbo.Channels WHERE GuildId = '{guildId}'";
+                string sqlExpression2 = $"DELETE FROM DiscordBotDURAKDataBase.dbo.IdTable WHERE GuildId = '{guildId}'";
+                using (SqlConnection connection = new(connectionString))
+                {
+                    connection.Open();
+                    SqlCommand command1 = new(sqlExpression1, connection);
+                    SqlCommand command2 = new(sqlExpression2, connection);
+                    command1.ExecuteNonQuery();
+                    command2.ExecuteNonQuery();
+                }
+            }
+            
+        }
     }
 }

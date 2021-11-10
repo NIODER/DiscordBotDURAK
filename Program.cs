@@ -31,6 +31,7 @@ namespace DiscordBotDURAK
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
             await client.SetGameAsync("$help");
+            await Task.Run(() => DeleteUnavalibleGuildsFDB(client.Guilds));
 
             Console.ReadLine();
         }
@@ -43,7 +44,7 @@ namespace DiscordBotDURAK
 
         private Task CommandsHandler(SocketMessage message)
         {
-            if (!DataBase.SearchChannelInDB(message.Channel.Id))
+            if (!DataBase.SearchChannelInDB(message.Channel.Id) && message.Channel.GetType().ToString() != "Discord.WebSocket.SocketDMChannel")
             {
                 if (DataBase.SearchGuildIDB(((SocketGuildChannel)message.Channel).Guild.Id))
                 {
@@ -148,6 +149,23 @@ namespace DiscordBotDURAK
 
         #region internal
 
+        private void DeleteUnavalibleGuildsFDB(IReadOnlyCollection<SocketGuild> guilds)
+        {
+            IEnumerable<ulong> dbguilds = DataBase.GetAll();
+            List<ulong> result = new();
+            foreach (var guild in guilds)
+            {
+                foreach (var dbguild in dbguilds)
+                {
+                    if (guild.Id != dbguild)
+                    {
+                        result.Add(dbguild);
+                    }
+                }
+            }
+            DataBase.DeleteGuilds(result);
+        }
+
         /// <summary>
         /// Check if bot can moderate this channel
         /// </summary>
@@ -155,6 +173,10 @@ namespace DiscordBotDURAK
         /// <returns>true if bot can moderate this channel</returns>
         private bool CheckChannel(SocketMessage message)
         {
+            if (message.Channel.GetType().ToString() == "Discord.WebSocket.SocketDMChannel")
+            {
+                return true;
+            }
             if (!CheckGuild(message))
             {
                 AddGuildInDB(message);
@@ -243,6 +265,10 @@ namespace DiscordBotDURAK
         /// <returns>true if message authos is admin</returns>
         private bool CheckAdmin(SocketMessage message)
         {
+            if (message.Channel.GetType().ToString() == "Discord.WebSocket.SocketDMChannel")
+            {
+                return false;
+            }
             SocketGuildChannel channel = (SocketGuildChannel)message.Channel;
             IEnumerable<string> adminCollection = DataBase.GetAdminsFDB(channel.Guild.Id);
 

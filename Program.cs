@@ -14,6 +14,7 @@ namespace DiscordBotDURAK
         DiscordSocketClient client;
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
+        private static bool checkGuilds = true;
 
         private async Task MainAsync()
         {
@@ -31,12 +32,11 @@ namespace DiscordBotDURAK
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
             await client.SetGameAsync("$help");
-            await Task.Run(() => DeleteUnavalibleGuildsFDB(client.Guilds));
 
             Console.ReadLine();
         }
 
-        private Task Log(LogMessage message)
+        public static Task Log(LogMessage message)
         {
             Console.WriteLine(message.ToString());
             return Task.CompletedTask;
@@ -44,6 +44,10 @@ namespace DiscordBotDURAK
 
         private Task CommandsHandler(SocketMessage message)
         {
+            if (checkGuilds)
+            {
+                DeleteUnavalibleGuildsFDB(client.Guilds);
+            }
             if (!DataBase.SearchChannelInDB(message.Channel.Id) && message.Channel.GetType().ToString() != "Discord.WebSocket.SocketDMChannel")
             {
                 if (DataBase.SearchGuildIDB(((SocketGuildChannel)message.Channel).Guild.Id))
@@ -151,19 +155,18 @@ namespace DiscordBotDURAK
 
         private void DeleteUnavalibleGuildsFDB(IReadOnlyCollection<SocketGuild> guilds)
         {
-            IEnumerable<ulong> dbguilds = DataBase.GetAll();
-            List<ulong> result = new();
-            foreach (var guild in guilds)
+            List<ulong> dbguilds = DataBase.GetAll();
+            foreach (var onlineGuild in guilds)
             {
-                foreach (var dbguild in dbguilds)
+                foreach (var dbguild in dbguilds.ToArray())
                 {
-                    if (guild.Id != dbguild)
+                    if (onlineGuild.Id == dbguild)
                     {
-                        result.Add(dbguild);
+                        dbguilds.Remove(dbguild);
                     }
                 }
             }
-            DataBase.DeleteGuilds(result);
+            DataBase.DeleteGuilds(dbguilds);
         }
 
         /// <summary>

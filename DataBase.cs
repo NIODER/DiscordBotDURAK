@@ -214,7 +214,10 @@ namespace DiscordBotDURAK
                 }
                 else
                 {
-                    throw new Exception("No such a channel in DB");
+                    Program.Log(new Discord.LogMessage(Discord.LogSeverity.Error,
+                                                       Constants.Sources.internal_function,
+                                                       $"No reference channel for guild {guildId}"));
+                    return 0;
                 }
             }
         }
@@ -284,7 +287,7 @@ namespace DiscordBotDURAK
         /// Get All guild ids from DB
         /// </summary>
         /// <returns>list of ids</returns>
-        public static IEnumerable<ulong> GetAll()
+        public static List<ulong> GetAll()
         {
             List<ulong> all = new List<ulong>();
             string sqlExpression = "SELECT GuildId FROM DiscordBotDURAKDataBase.dbo.IdTable";

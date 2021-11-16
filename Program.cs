@@ -339,6 +339,7 @@ namespace DiscordBotDURAK
             }
             string _quote =  messages.ToArray()[random.Next(messages.Count - 1)].Content;
             await message.Channel.SendMessageAsync(_quote);// работает, и славньо
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, $"Отправлена цитата в канал {message.Channel.Name}"));
         }
 
         private async void OwnerHelp(SocketMessage message)

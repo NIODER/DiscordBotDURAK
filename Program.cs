@@ -73,6 +73,11 @@ namespace DiscordBotDURAK
                   {
                       if (!message.Author.IsBot)
                       {
+                          if (message.Content.ToLower().StartsWith(Commands.quote))
+                          {
+                              MortarQuote(message);
+                          }
+
                           if (message.Content.StartsWith(Commands.search))
                           {
                               SearchMessages(message);
@@ -318,6 +323,23 @@ namespace DiscordBotDURAK
         #endregion
 
         #region functions
+
+        private async void MortarQuote(SocketMessage message)
+        {
+            var quoteChannel = client.GetChannel(546419059231555650);
+            IAsyncEnumerable<IReadOnlyCollection<IMessage>> quotes = ((ISocketMessageChannel)quoteChannel).GetMessagesAsync(1000);
+            Random random = new();
+            List<IMessage> messages = new();
+            await foreach (var quote in quotes)
+            {
+                foreach (var q in quote)
+                {
+                    messages.Add(q);
+                }
+            }
+            string _quote =  messages.ToArray()[random.Next(messages.Count - 1)].Content;
+            await message.Channel.SendMessageAsync(_quote);// работает, и славньо
+        }
 
         private async void OwnerHelp(SocketMessage message)
         {

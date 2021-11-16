@@ -21,6 +21,7 @@ namespace Constants
 
     public static class Commands
     {
+        public static readonly string quote = $"$цитата"; 
         public static readonly string owner = "$owner";
         public static readonly string setChannelType = "$set";
         public static readonly string delete = "$delete";

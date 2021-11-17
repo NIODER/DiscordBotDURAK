@@ -64,9 +64,12 @@ namespace DiscordBotDURAK
             }
             if (CheckChannel(message))
             {
-                if ((message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0))
+                if (DataBase.GetReferenceChannel(((SocketGuildChannel)message.Channel).Guild.Id) != message.Channel.Id)
                 {
-                    _ = DeleteMessageAsync(message, enableTimer: true);
+                    if ((message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0))
+                    {
+                        _ = DeleteMessageAsync(message, enableTimer: true);
+                    }
                 }
 
                 _ = Task.Run(() =>

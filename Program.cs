@@ -426,6 +426,10 @@ namespace DiscordBotDURAK
                 _ = message.Channel.SendMessageAsync("отказано");
                 return;
             }
+            if (message.Content.ToLower().Contains("http"))
+            {
+                return;
+            }
             string[] msg = message.Content.Split(' ');
             int counter = 3;
             try

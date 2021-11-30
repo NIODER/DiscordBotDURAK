@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Net;
+using System.IO;
+using HtmlAgilityPack;
+
+namespace DiscordBotDURAK.EthernetFunctions
+{
+    public static class CSGOServers
+    {
+        public static string GetAddress()
+        {
+            WebRequest request = WebRequest.Create("https://www.csgoservers.ru/mode-surf");
+            WebResponse response = request.GetResponse();
+            Stream stream = response.GetResponseStream();
+            StreamReader reader = new(stream);
+            string html = reader.ReadToEnd();
+            HtmlDocument htmlDocument = new();
+            htmlDocument.LoadHtml(html);
+            var addresses = htmlDocument.DocumentNode.SelectNodes(@"//a[contains(@class, 'hint--top hint--info')]");
+            List<string> stringAddresses = new();
+            foreach (var address in addresses)
+            {
+                stringAddresses.Add(address.InnerText);
+            }
+            return stringAddresses.ToArray()[new Random().Next(stringAddresses.Count() - 1)];
+        }
+    }
+}

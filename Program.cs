@@ -5,7 +5,9 @@ using Discord.WebSocket;
 using System.IO;
 using System.Collections.Generic;
 using EthernetFunctons.Balaboba;
+using EthernetFunctons;
 using Constants;
+using DiscordBotDURAK.EthernetFunctions;
 
 namespace DiscordBotDURAK
 {
@@ -64,9 +66,9 @@ namespace DiscordBotDURAK
             }
             if (CheckChannel(message))
             {
-                if (DataBase.GetReferenceChannel(((SocketGuildChannel)message.Channel).Guild.Id) != message.Channel.Id)
+                if (message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0)
                 {
-                    if ((message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0))
+                    if (DataBase.GetReferenceChannel(((SocketGuildChannel)message.Channel).Guild.Id) != message.Channel.Id)
                     {
                         _ = DeleteMessageAsync(message, enableTimer: true);
                     }
@@ -76,6 +78,11 @@ namespace DiscordBotDURAK
                   {
                       if (!message.Author.IsBot)
                       {
+                          if (message.Content.StartsWith(Commands.surf))
+                          {
+                              GetSurf(message);
+                          }
+
                           if (message.Content.ToLower().StartsWith(Commands.quote))
                           {
                               MortarQuote(message);
@@ -326,6 +333,12 @@ namespace DiscordBotDURAK
         #endregion
 
         #region functions
+
+        private async void GetSurf(SocketMessage message)
+        {
+            await message.Channel.SendMessageAsync(CSGOServers.GetAddress());
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, "Address sent"));
+        }
 
         private async void MortarQuote(SocketMessage message)
         {

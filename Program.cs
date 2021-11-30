@@ -78,6 +78,11 @@ namespace DiscordBotDURAK
                   {
                       if (!message.Author.IsBot)
                       {
+                          if (message.Content.StartsWith(Commands.joke))
+                          {
+                              GetJoke(message);
+                          }
+
                           if (message.Content.StartsWith(Commands.surf))
                           {
                               GetSurf(message);
@@ -333,6 +338,12 @@ namespace DiscordBotDURAK
         #endregion
 
         #region functions
+
+        private async void GetJoke(SocketMessage message)
+        {
+            await message.Channel.SendMessageAsync(Joke.GetJoke());
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, "Joke sent"));
+        }
 
         private async void GetSurf(SocketMessage message)
         {

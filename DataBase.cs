@@ -9,6 +9,58 @@ namespace DiscordBotDURAK
     {
         private static string connectionString = @"Data Source=DESKTOP-OVCM484\SQLEXPRESS;Initial Catalog=DiscordBotDURAKDataBase;Integrated Security=True";
         /// <summary>
+        /// Add reference on radio to db
+        /// </summary>
+        /// <param name="reference">reference to radio</param>
+        public static void AddRadioFavor(string reference)
+        {
+            string sqlExpression = $"INSERT INTO [DiscordBotDURAKDataBase].[dbo].[RadioRefs] (refs) VALUES ('{reference}')";
+
+            if (!GetAllRadioFDB().ToList().Contains(reference))
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    SqlCommand command = new SqlCommand(sqlExpression, connection);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        /// <summary>
+        /// Get all references fron db
+        /// </summary>
+        /// <returns>Connection of references</returns>
+        public static IEnumerable<string> GetAllRadioFDB()
+        {
+            List<string> refs = new();
+            string sqlExpression = $"SELECT * FROM [DiscordBotDURAKDataBase].[dbo].[RadioRefs]";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand(sqlExpression, connection);
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        refs.Add(reader.GetString(0));
+                    }
+                }
+            }
+            return refs;
+        }
+        public static void DeleteFavour(string reference)
+        {
+            string sqlExpresion = $"DELETE FROM [DiscordBotDURAKDataBase].[dbo].[RadioRefs] WHERE (refs = '{reference}')";
+            using (SqlConnection connection = new(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new(sqlExpresion, connection);
+                command.ExecuteNonQuery();
+            }
+        }
+        /// <summary>
         /// Добавляет id админа в БД, если его там еще нет.
         /// </summary>
         /// <param name="guildId">Id of guild</param>

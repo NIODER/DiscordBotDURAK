@@ -78,6 +78,16 @@ namespace DiscordBotDURAK
                   {
                       if (!message.Author.IsBot)
                       {
+                          if (message.Content.StartsWith(Commands.favorRadio))
+                          {
+                              GetFavour(message);
+                          }
+
+                          if (message.Content.StartsWith(Commands.radio))
+                          {
+                              GetRadio(message);
+                          }
+
                           if (message.Content.StartsWith(Commands.joke))
                           {
                               GetJoke(message);
@@ -130,6 +140,16 @@ namespace DiscordBotDURAK
 
                           if (CheckAdmin(message))
                           {
+                              if (message.Content.StartsWith(Commands.deleteFavorRadio))
+                              {
+                                  DeleteFavour(message);
+                              }
+
+                              if (message.Content.StartsWith(Commands.setRadio))
+                              {
+                                  SetFavour(message);
+                              }
+
                               if (message.Content.StartsWith(Commands.joinedAt))
                               {
                                   WhenJoined(message);
@@ -344,6 +364,45 @@ namespace DiscordBotDURAK
 
         #region functions
 
+        private async void DeleteFavour(SocketMessage message)
+        {
+            string reference = message.Content.Split(' ')[1];
+            DataBase.DeleteFavour(reference);
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, "Radio deleted"));
+        }
+
+        private async void GetFavour(SocketMessage message)
+        {
+            var refs = DataBase.GetAllRadioFDB();
+            foreach (string reference in refs)
+            {
+                await message.Channel.SendMessageAsync(reference);
+            }
+        }
+
+        private async void SetFavour(SocketMessage message)
+        {
+            string reference = message.Content.Split(' ')[1];
+            DataBase.AddRadioFavor(reference);
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, "Reference added"));
+        }
+
+        private async void GetRadio(SocketMessage message)
+        {
+            string key = message.Content.Remove(0, Commands.radio.Length).Trim();
+            try
+            {
+                await message.Channel.SendMessageAsync(RadioReferences.GetRadio(key).Remove(2000));
+            }
+            catch (ArgumentException)
+            {
+                await message.Channel.SendMessageAsync("Я не нашел ничего подходящего");
+                await Log(new LogMessage(LogSeverity.Error, Sources.command, "Radios not sent"));
+                return;
+            }
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, "Radios sent"));
+        }
+
         private async void WhenJoined(SocketMessage message)
         {
             var users = message.MentionedUsers;
@@ -362,7 +421,7 @@ namespace DiscordBotDURAK
 
         private async void GetSurf(SocketMessage message)
         {
-            await message.Channel.SendMessageAsync(CSGOServers.GetAddress());
+            await message.Channel.SendMessageAsync($"connect {CSGOServers.GetAddress()}");
             await Log(new LogMessage(LogSeverity.Info, Sources.command, "Address sent"));
         }
 

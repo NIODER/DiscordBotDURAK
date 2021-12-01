@@ -21,12 +21,16 @@ namespace Constants
 
     public static class Commands
     {
+        public static readonly string deleteFavorRadio = $"$dr";
+        public static readonly string favorRadio = $"$r избранное";
+        public static readonly string radio = $"$radio";
         public static readonly string joinedAt = $"$joinedAt";
         public static readonly string joke = $"$joke";
         public static readonly string surf = $"$surf";
         public static readonly string quote = $"$цитата"; 
         public static readonly string owner = "$owner";
         public static readonly string setChannelType = "$set";
+        public static readonly string setRadio = $"$rset";
         public static readonly string delete = "$delete";
         public static readonly string random = "$random"; 
         public static readonly string spam = "$spam"; 

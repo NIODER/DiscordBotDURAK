@@ -130,6 +130,11 @@ namespace DiscordBotDURAK
 
                           if (CheckAdmin(message))
                           {
+                              if (message.Content.StartsWith(Commands.joinedAt))
+                              {
+                                  WhenJoined(message);
+                              }
+
                               if (message.Content.ToLower() == Commands.owner)
                               {
                                   OwnerHelp(message);
@@ -338,6 +343,16 @@ namespace DiscordBotDURAK
         #endregion
 
         #region functions
+
+        private async void WhenJoined(SocketMessage message)
+        {
+            var users = message.MentionedUsers;
+            foreach (var user in users)
+            {
+                var socketGuildUser = (SocketGuildUser)user;
+                await message.Channel.SendMessageAsync($"{socketGuildUser.Username} присоеденился {socketGuildUser.JoinedAt}");
+            }
+        }
 
         private async void GetJoke(SocketMessage message)
         {

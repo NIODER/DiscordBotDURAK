@@ -21,6 +21,7 @@ namespace Constants
 
     public static class Commands
     {
+        public static readonly string joinedAt = $"$joinedAt";
         public static readonly string joke = $"$joke";
         public static readonly string surf = $"$surf";
         public static readonly string quote = $"$цитата"; 

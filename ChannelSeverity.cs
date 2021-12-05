@@ -22,6 +22,7 @@ namespace DiscordBotDURAK
         /// <summary>
         /// Channel with flood
         /// </summary>
-        Flood = 3
+        Flood = 3,
+        NoSuchChannel = 4
     }
 }

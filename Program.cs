@@ -8,6 +8,7 @@ using EthernetFunctons.Balaboba;
 using EthernetFunctons;
 using Constants;
 using DiscordBotDURAK.EthernetFunctions;
+using System.Threading;
 
 namespace DiscordBotDURAK
 {
@@ -17,6 +18,7 @@ namespace DiscordBotDURAK
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
         private static bool checkGuilds = true;
+        public static Mutex mutex = new();
 
         private async Task MainAsync()
         {
@@ -46,29 +48,22 @@ namespace DiscordBotDURAK
 
         private Task CommandsHandler(SocketMessage message)
         {
-            if (checkGuilds)
+            CheckGuilds(client.Guilds);
+            if (!message.Channel.isDirect())
             {
-                DeleteUnavalibleGuildsFDB(client.Guilds);
-            }
-            if (!DataBase.SearchChannelInDB(message.Channel.Id) && message.Channel.GetType().ToString() != "Discord.WebSocket.SocketDMChannel")
-            {
-                if (DataBase.SearchGuildIDB(((SocketGuildChannel)message.Channel).Guild.Id))
+                if (message.Channel.ChannelType() == ChannelSeverity.NoSuchChannel)
                 {
-                    DataBase.AddChannelInDB(((SocketGuildChannel)message.Channel).Guild.Id, message.Channel.Id);
+                    MyDatabase.AddChannel(message.GuildId(), message.Channel.Id);
                     message.Channel.SendMessageAsync("Этот канал помечен типом \"флуд\", чтобы " +
                         "показать сводку типов, а также узнать, как изменить тип " +
                         "напишите $help");
-                }
-                else
-                {
-                    AddGuildInDB(message);
                 }
             }
             if (CheckChannel(message))
             {
                 if (message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0)
                 {
-                    if (DataBase.GetReferenceChannel(((SocketGuildChannel)message.Channel).Guild.Id) != message.Channel.Id)
+                    if (!message.Channel.IsReferences())
                     {
                         _ = DeleteMessageAsync(message, enableTimer: true);
                     }
@@ -138,7 +133,7 @@ namespace DiscordBotDURAK
                               RefModeration(message);
                           }
 
-                          if (CheckAdmin(message))
+                          if (message.IsAuthorAdmin())
                           {
                               if (message.Content.StartsWith(Commands.deleteFavorRadio))
                               {
@@ -198,20 +193,45 @@ namespace DiscordBotDURAK
 
         #region internal
 
-        private void DeleteUnavalibleGuildsFDB(IReadOnlyCollection<SocketGuild> guilds)
+        private void CheckGuilds(IReadOnlyCollection<SocketGuild> guilds)
         {
-            List<ulong> dbguilds = DataBase.GetAll();
-            foreach (var onlineGuild in guilds)
+            var dbguilds = MyDatabase.GetGuilds();
+            bool delete;
+            foreach (var dbguild in dbguilds)
             {
-                foreach (var dbguild in dbguilds.ToArray())
+                delete = true;
+                foreach (var guild in guilds)
                 {
-                    if (onlineGuild.Id == dbguild)
+                    if (dbguild == guild.Id)
                     {
-                        dbguilds.Remove(dbguild);
+                        delete = false;
+                        break;
                     }
                 }
+                if (delete)
+                {
+                    MyDatabase.DeleteGuild(Convert.ToString(dbguild));
+                }
             }
-            DataBase.DeleteGuilds(dbguilds);
+            bool add;
+            dbguilds = MyDatabase.GetGuilds();
+            foreach (var guild in guilds)
+            {
+                add = true;
+
+                foreach (var dbguild in dbguilds)
+                {
+                    if (dbguild == guild.Id)
+                    {
+                        add = false;
+                        break;
+                    }
+                }
+                if (add)
+                {
+                    AddGuildInDB(guild);
+                }
+            }
         }
 
         /// <summary>
@@ -225,46 +245,46 @@ namespace DiscordBotDURAK
             {
                 return true;
             }
-            if (!CheckGuild(message))
+            if (!((SocketGuildChannel)message.Channel).Guild.Check())
             {
                 AddGuildInDB(message);
             }
-            return DataBase.GetChannelType(message.Channel.Id) != ChannelSeverity.None;
+            return message.Channel.ChannelType() != ChannelSeverity.None;
         }
-
-        //Check guilds
 
         private void AddGuildInDB(SocketMessage message)
         {
             SocketGuild guild = ((SocketGuildChannel)message.Channel).Guild;
-            DataBase.AddAdminIDB(guild.Id, guild.OwnerId);
-            _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Add guild \"{guild.Name}\" in DB"));
-            var channels = guild.Channels;
-            foreach (var channel in channels)
+            string guildId = message.GuildId();
+            MyDatabase.AddGuild(guildId);
+            MyDatabase.AddAdmin(guildId, guild.OwnerId);
+            foreach (var channel in guild.Channels)
             {
-                DataBase.AddChannelInDB(guild.Id, channel.Id);
-                _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Add channel \"{channel.Name}\" in DB"));
+                MyDatabase.AddChannel(guildId, channel.Id);
             }
             Hello(guild.Owner);
         }
 
+        private void AddGuildInDB(SocketGuild guild)
+        {
+            string guildId = Convert.ToString(guild.Id);
+            MyDatabase.AddGuild(guildId);
+            MyDatabase.AddAdmin(guildId, guild.OwnerId);
+            foreach (var channel in guild.Channels)
+            {
+                MyDatabase.AddChannel(guildId, channel.Id);
+            }
+            Hello(guild.Owner);
+        }
+
+
+
         private async void Hello(SocketGuildUser owner)
         {
-            await owner.SendMessageAsync("Привет, я бот-дурак, ты владелец сервера, давай дружить!");
+            await owner.SendMessageAsync($"Привет, я бот-дурак, ты владелец сервера, давай дружить!");
             await owner.SendMessageAsync("Сейчас ты - единственный и неповторимы админ для меня на этом сервере) " +
                 "нужно будет добавить еще админов(если хочешь) и обязательно настроить чаты! Когда захочешь это сделать " +
                 "напиши мне команду $owner (будет много букв, но я верю в тебя)");
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns>true if guild was found in DB</returns>
-        private bool CheckGuild(SocketMessage message)
-        {
-            ulong guildId = ((SocketGuildChannel)message.Channel).Guild.Id;
-            return DataBase.SearchGuildIDB(guildId);
         }
 
         /// <summary>
@@ -298,7 +318,7 @@ namespace DiscordBotDURAK
             }
             if (Enum.IsDefined(typeof(ChannelSeverity), severity))
             {
-                DataBase.AddChannelType(id, (ChannelSeverity)severity);
+                MyDatabase.UpdateChannelType(message.GuildId(), id, (ChannelSeverity)severity);
             }
             else
             {
@@ -306,36 +326,6 @@ namespace DiscordBotDURAK
             }
         }
         
-        /// <summary>
-        /// Check if message author is admin
-        /// </summary>
-        /// <param name="message">message</param>
-        /// <returns>true if message authos is admin</returns>
-        private bool CheckAdmin(SocketMessage message)
-        {
-            if (message.Channel.GetType().ToString() == "Discord.WebSocket.SocketDMChannel")
-            {
-                return false;
-            }
-            SocketGuildChannel channel = (SocketGuildChannel)message.Channel;
-            IEnumerable<string> adminCollection = DataBase.GetAdminsFDB(channel.Guild.Id);
-
-            if (adminCollection == null)
-            {
-                return false;
-            }
-            else
-            {
-                foreach (var admin in adminCollection)
-                {
-                    if (Convert.ToUInt64(admin) == message.Author.Id)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
         /// <summary>
         /// Deletes message
         /// </summary>
@@ -347,7 +337,7 @@ namespace DiscordBotDURAK
         {
             if (enableTimer)
             {
-                if (DataBase.GetChannelType(message.Channel.Id) != ChannelSeverity.None || DataBase.GetChannelType(message.Channel.Id) != ChannelSeverity.References)
+                if (message.Channel.ChannelType() != ChannelSeverity.None || message.Channel.IsReferences())
                 {
                     await Task.Delay(timer);
                     await message.Channel.DeleteMessageAsync(message.Id);
@@ -367,13 +357,13 @@ namespace DiscordBotDURAK
         private async void DeleteFavour(SocketMessage message)
         {
             string reference = message.Content.Split(' ')[1];
-            DataBase.DeleteFavour(reference);
+            MyDatabase.DeleteRadio(message.GuildId(), reference);
             await Log(new LogMessage(LogSeverity.Info, Sources.command, "Radio deleted"));
         }
 
         private async void GetFavour(SocketMessage message)
         {
-            var refs = DataBase.GetAllRadioFDB();
+            var refs = MyDatabase.GetRadio(message.GuildId());
             foreach (string reference in refs)
             {
                 await message.Channel.SendMessageAsync(reference);
@@ -383,7 +373,7 @@ namespace DiscordBotDURAK
         private async void SetFavour(SocketMessage message)
         {
             string reference = message.Content.Split(' ')[1];
-            DataBase.AddRadioFavor(reference);
+            MyDatabase.AddRadio(message.GuildId(), reference);
             await Log(new LogMessage(LogSeverity.Info, Sources.command, "Reference added"));
         }
 
@@ -481,12 +471,9 @@ namespace DiscordBotDURAK
                 return;
             }
             string admins = " ";
-            ulong adminId;
-            ulong guildId = ((SocketGuildChannel)message.Channel).Guild.Id;
             foreach (var user in message.MentionedUsers)
             {
-                adminId = user.Id;
-                DataBase.AddAdminIDB(guildId, adminId);
+                MyDatabase.AddAdmin(message.GuildId(), user.Id);
                 admins = admins.Insert(admins.Length, user.Username + " ");
             }
             _ = Log(new(LogSeverity.Info, Sources.internal_function, $"Gave admin to{admins}"));
@@ -519,7 +506,7 @@ namespace DiscordBotDURAK
 
         private async void SPAM_Func(SocketMessage message)
         {
-            if (message.Channel.Id == DataBase.GetReferenceChannel(((SocketGuildChannel)message.Channel).Guild.Id))
+            if (message.Channel.IsReferences())
             {
                 _ = message.Channel.SendMessageAsync("отказано");
                 return;
@@ -578,35 +565,38 @@ namespace DiscordBotDURAK
 
         private async void RefModeration(IMessage message)
         {
-            ulong referenceChannelId = DataBase.GetReferenceChannel(((SocketGuildChannel)message.Channel).Guild.Id);
-            if (message.Channel.Id == referenceChannelId)
+            ISocketMessageChannel channel = ((ISocketMessageChannel)message.Channel);
+            if (channel.IsReferences())
             {
                 return;
             }
             if (message.Content.Contains("http"))
             {
-                if (message.Content.Contains("gfycat"))
+                if (message.Content.Contains("gfycat") && message.Content.Contains("gif"))
                 {
                     await message.Channel.SendMessageAsync($"||{message.Content}||");
                     await message.DeleteAsync();
                     return;
                 }
-                if (message.Content.Contains("gif"))
-                {
-                    return;
-                }
                 ulong autorId = message.Author.Id;
                 string content = message.Content;
                 await message.DeleteAsync();
-                ISocketMessageChannel channel = (ISocketMessageChannel)client.GetChannel(referenceChannelId);
+                ISocketMessageChannel referencesChannel = 
+                    client.GetChannel(
+                        MyDatabase.GetReferencesChannel(
+                            Convert.ToString(
+                                ((SocketGuildChannel)channel).Guild.Id
+                                )
+                            )
+                        ) as ISocketMessageChannel;
                 if (message.Content.ToLower().Contains("разд") || message.Content.ToLower().Contains("нитро") || message.Content.ToLower().Contains("nitro"))
                 {
-                    await channel.SendMessageAsync($"Вероятно, это очередной скам \n ||{content}||");
+                    await referencesChannel.SendMessageAsync($"Вероятно, это очередной скам \n ||{content}||");
 
                     Console.WriteLine($"Переслано скам сообщение от {message.Author.Username}.");
                     return;
                 }
-                await channel.SendMessageAsync($"<@{autorId}>: \n\"{content}\"");
+                await referencesChannel.SendMessageAsync($"<@{autorId}>: \n\"{content}\"");
                 await Log(new(LogSeverity.Info, Sources.command, $"Message from {message.Author.Username} has been redirected"));
             }
         }
@@ -623,30 +613,46 @@ namespace DiscordBotDURAK
         {
             string content = message.Content.Remove(0, command.Length).TrimStart().TrimEnd(); //сообщение без слова-команды
             var messages = message.Channel.GetMessagesAsync();
-            await foreach (var item in messages)
+            try
             {
-                foreach (var msg in item)
+                await foreach (var item in messages)
                 {
-                    if (msg.Content.Contains(content))
+                    foreach (var msg in item)
                     {
-                        await msg.DeleteAsync();
+                        if (msg.Content.Contains(content))
+                        {
+                            await msg.DeleteAsync();
+                        }
                     }
                 }
             }
-            await Log(new(LogSeverity.Info, Sources.command, $"Cleaned channel {message.Channel.Name}"));
+            catch (Discord.Net.HttpException e )
+            {
+                await Log(new LogMessage(LogSeverity.Error, "HttpException", e.Message));
+            }
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, $"Cleaned channel {message.Channel.Name}"));
         }
 
         private async void Moderate(SocketMessage message)
         {
+            if (message.Channel.IsReferences())
+            {
+                return;
+            }
             var collection = message.Channel.GetMessagesAsync();
             await foreach (var messages in collection)
             {
                 foreach (var msg in messages)
                 {
-                    RefModeration(msg);
+                    if (msg.Content.Contains("<@") && msg.Content.Contains(">"))
+                    {
+                        await msg.DeleteAsync();
+                        continue;
+                    }
                 }
             }
             await message.DeleteAsync();
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, $"Channel {message.Channel.Name} cleaned"));
         }
 
         //private async void Moderate(List<SocketGuildChannel> channels)

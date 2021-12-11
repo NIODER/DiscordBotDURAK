@@ -78,6 +78,11 @@ namespace DiscordBotDURAK
                               GetFavour(message);
                           }
 
+                          if (message.Content.StartsWith("$play"))
+                          {
+                              EnableRadio(message);
+                          }
+
                           if (message.Content.StartsWith(Commands.radio))
                           {
                               GetRadio(message);
@@ -354,6 +359,11 @@ namespace DiscordBotDURAK
 
         #region functions
 
+        private async void EnableRadio(SocketMessage message)
+        {
+
+        }
+
         private async void DeleteFavour(SocketMessage message)
         {
             string reference = message.Content.Split(' ')[1];
@@ -538,7 +548,7 @@ namespace DiscordBotDURAK
             }
             catch (ArgumentException)
             {
-                await message.Channel.SendMessageAsync("Нихрена не понимаю ни одного слова");
+                await message.Channel.SendMessageAsync($"Правильно \"$spam 5 aboba\", к примеру");
             }
             await Log(new(LogSeverity.Info, Sources.command, $"{word} spammed {counter} times"));
             //Clear(message, msg[0]+msg[1]);
@@ -578,17 +588,16 @@ namespace DiscordBotDURAK
                     await message.DeleteAsync();
                     return;
                 }
+                ulong refsChannelId = MyDatabase.GetReferencesChannel(Convert.ToString(((SocketGuildChannel)channel).Guild.Id));
+                if (refsChannelId == 0)
+                {
+                    return;
+                }
                 ulong autorId = message.Author.Id;
                 string content = message.Content;
-                await message.DeleteAsync();
+                await message.DeleteAsync();    
                 ISocketMessageChannel referencesChannel = 
-                    client.GetChannel(
-                        MyDatabase.GetReferencesChannel(
-                            Convert.ToString(
-                                ((SocketGuildChannel)channel).Guild.Id
-                                )
-                            )
-                        ) as ISocketMessageChannel;
+                    client.GetChannel(refsChannelId) as ISocketMessageChannel;
                 if (message.Content.ToLower().Contains("разд") || message.Content.ToLower().Contains("нитро") || message.Content.ToLower().Contains("nitro"))
                 {
                     await referencesChannel.SendMessageAsync($"Вероятно, это очередной скам \n ||{content}||");
@@ -596,7 +605,7 @@ namespace DiscordBotDURAK
                     Console.WriteLine($"Переслано скам сообщение от {message.Author.Username}.");
                     return;
                 }
-                await referencesChannel.SendMessageAsync($"<@{autorId}>: \n\"{content}\"");
+                await referencesChannel.SendMessageAsync($"<@{autorId}>: \n\"{content}\""); //(!)
                 await Log(new(LogSeverity.Info, Sources.command, $"Message from {message.Author.Username} has been redirected"));
             }
         }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net;
 using System.IO;
 using HtmlAgilityPack;
@@ -11,11 +9,11 @@ namespace DiscordBotDURAK.EthernetFunctions
 {
     public static class Surf
     {
-        public class Server
+        protected class Server
         {
-            public HtmlNode name { get; }
-            public HtmlNode address { get; }
-            public HtmlNode map_description { get; }
+            internal protected HtmlNode name { get; }
+            internal protected HtmlNode address { get; }
+            internal protected HtmlNode map_description { get; }
 
             internal Server(HtmlNode tr, HtmlDocument html)
             {
@@ -42,12 +40,6 @@ namespace DiscordBotDURAK.EthernetFunctions
                 servers.Add(new Server(td, htmlDocument));
             }
 
-            //var addresses = htmlDocument.DocumentNode.SelectNodes(@"//span[contains(@class, 'serverip')]");
-            //List<string> stringAddresses = new();
-            //foreach (var address in addresses)
-            //{
-            //    stringAddresses.Add(address.InnerText);
-            //}
             var rand = servers.ElementAt(new Random().Next(servers.Count - 1));
             string result = $"Сервер: {rand.name.InnerText}\nКарта: {rand.map_description.InnerText}\nconnect {rand.address.InnerText}";
 

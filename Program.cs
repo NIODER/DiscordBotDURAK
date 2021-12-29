@@ -421,7 +421,7 @@ namespace DiscordBotDURAK
 
         private async void GetSurf(SocketMessage message)
         {
-            await message.Channel.SendMessageAsync($"connect {CSGOServers.GetAddress()}");
+            await message.Channel.SendMessageAsync($"connect {Surf.GetAddress()}");
             await Log(new LogMessage(LogSeverity.Info, Sources.command, "Address sent"));
         }
 

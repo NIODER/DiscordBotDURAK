@@ -49,7 +49,7 @@ namespace DiscordBotDURAK.EthernetFunctions
             //    stringAddresses.Add(address.InnerText);
             //}
             var rand = servers.ElementAt(new Random().Next(servers.Count - 1));
-            string result = $"{rand.name}\n{rand.map_description}\n{rand.address}";
+            string result = $"Сервер: {rand.name.InnerText}\nКарта: {rand.map_description.InnerText}\nconnect {rand.address.InnerText}";
 
             return result;
         }

@@ -10,7 +10,7 @@ namespace DiscordBotDURAK.EthernetFunctions
     {
         public static string GetJoke()
         {
-            WebRequest request = WebRequest.Create("https://anekdotovstreet.com/chernyy-yumor/");
+            WebRequest request = WebRequest.Create("https://vse-shutochki.ru/anekdoty");
             WebResponse response = request.GetResponse();
             List<string> jokes = new();
             string html = "";
@@ -26,14 +26,23 @@ namespace DiscordBotDURAK.EthernetFunctions
             HtmlDocument document = new();
             document.LoadHtml(html);
 
-            var jokeNodes = document.DocumentNode.SelectNodes(@"//div[contains(@class, 'anekdot-text')]/p");
-
+            var jokeNodes = document.DocumentNode.SelectNodes(@"//div[contains(@class, 'post')]");
+            int i = 0;
+            string str_joke = "";
             foreach (var joke in jokeNodes)
             {
-                jokes.Add(joke.InnerText);
+                foreach (var text in document.DocumentNode.SelectNodes(joke.XPath + "/text()"))
+                {
+                    str_joke += text.InnerText;
+                }
+                if (str_joke.Trim() != "")
+                {
+                    jokes.Add(str_joke);
+                }
+                str_joke = "";
             }
 
-            return jokes.ToArray()[new Random().Next(jokes.Count - 1)];
+            return jokes[new Random().Next(jokes.Count)];
         }
     }
 }

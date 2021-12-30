@@ -415,14 +415,16 @@ namespace DiscordBotDURAK
 
         private async void GetJoke(SocketMessage message)
         {
-            await message.Channel.SendMessageAsync(Joke.GetJoke());
-            await Log(new LogMessage(LogSeverity.Info, Sources.command, "Joke sent"));
+            string joke = Joke.GetJoke();
+            await message.Channel.SendMessageAsync(joke);
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, $"GetJoke() : {joke}"));
         }
 
         private async void GetSurf(SocketMessage message)
         {
-            await message.Channel.SendMessageAsync(Surf.GetAddress());
-            await Log(new LogMessage(LogSeverity.Info, Sources.command, "Address sent"));
+            string address = Surf.GetAddress();
+            await message.Channel.SendMessageAsync(address);
+            await Log(new LogMessage(LogSeverity.Info, Sources.command, $"GetSurf() : {address}"));
         }
 
         private async void MortarQuote(SocketMessage message)

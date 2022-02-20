@@ -9,8 +9,8 @@ namespace Constants
         public static readonly string logPath = @"E:\log.TXT";
         public static readonly string tokenPath = @"E:\TOKEN.txt";
         public static readonly string tabulation = "\n__________________________________________\n";
-        public static readonly string helpPath = @"E:\MyProgs\Home\c sharp\DiscordBotDURAK\helpMessage.txt";
-        public static readonly string ownerMessagePath = @"E:\MyProgs\Home\c sharp\DiscordBotDURAK\ownerMessage.txt";
+        public static readonly string helpPath = @"E:\MyProgs\Home\c sharp\DiscordBotDURAK\Resources\helpMessage.txt";
+        public static readonly string ownerMessagePath = @"E:\MyProgs\Home\c sharp\DiscordBotDURAK\Resources\ownerMessage.txt";
     }
 
     public static class Sources

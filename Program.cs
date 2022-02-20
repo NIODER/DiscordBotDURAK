@@ -17,8 +17,6 @@ namespace DiscordBotDURAK
         DiscordSocketClient client;
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
-        private static bool checkGuilds = true;
-        public static Mutex mutex = new();
 
         private async Task MainAsync()
         {
@@ -78,10 +76,10 @@ namespace DiscordBotDURAK
                               GetFavour(message);
                           }
 
-                          if (message.Content.StartsWith("$play"))
-                          {
-                              EnableRadio(message);
-                          }
+                          //if (message.Content.StartsWith("$play"))
+                          //{
+                          //    EnableRadio(message);
+                          //}
 
                           if (message.Content.StartsWith(Commands.radio))
                           {
@@ -359,10 +357,10 @@ namespace DiscordBotDURAK
 
         #region functions
 
-        private async void EnableRadio(SocketMessage message)
-        {
+        //private async void EnableRadio(SocketMessage message)
+        //{
 
-        }
+        //}
 
         private async void DeleteFavour(SocketMessage message)
         {
@@ -582,9 +580,9 @@ namespace DiscordBotDURAK
             {
                 return;
             }
-            if (message.Content.Contains("http"))
+            if (message.Content.Contains("http") && !message.Content.Contains("tenor"))
             {
-                if (message.Content.Contains("gfycat") && message.Content.Contains("gif"))
+                if (message.Content.Contains("gfycat"))
                 {
                     await message.Channel.SendMessageAsync($"||{message.Content}||");
                     await message.DeleteAsync();

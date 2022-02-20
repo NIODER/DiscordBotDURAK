@@ -17,7 +17,7 @@ namespace DiscordBotDURAK
             string sqlExpression =
                 $"INSERT INTO [DiscordBotDURAKDataBase].[dbo].[Guilds] (guild) VALUES ('{guildId}') " +
                 $"CREATE TABLE [{guildId}].[Admins] (Admin NVARCHAR(50) NOT NULL) " +
-                $"CREATE TABLE [{guildId}].[Channels] (Channel NVARCHAR(50) NOT NULL, Type NVARCHAR(50) NOT NULL) " +
+                $"CREATE TABLE [{guildId}].[Channels] (Channel NVARCHAR(50) NOT NULL, Summary NVARCHAR(50 NOT NULL) " +
                 $"CREATE TABLE [{guildId}].[Radio] (Reference NVARCHAR(50) NOT NULL) ";
             if (!inDatabase(guildId))
             {
@@ -30,7 +30,7 @@ namespace DiscordBotDURAK
                     {
                         schema.ExecuteNonQuery();
                     }
-                    catch (System.Data.SqlClient.SqlException) { }
+                    catch (SqlException) { }
                     command.ExecuteNonQuery();
                 }
             }
@@ -48,8 +48,7 @@ namespace DiscordBotDURAK
         }
         public static void AddChannel(string guildId, ulong channelId)
         {
-            string sqlExpression =
-                $"INSERT INTO [DiscordBotDURAKDataBase].[{guildId}].[Channels] (Channel, Type) VALUES ('{Convert.ToString(channelId)}', '{ChannelSeverity.Flood}');";
+            string sqlExpression = $"INSERT INTO [DiscordBotDURAKDataBase].[{guildId}].[Channels] (Channel, Type) VALUES ('{Convert.ToString(channelId)}', '{ChannelSeverity.Flood}');";
             using (SqlConnection connection = new(connectionString))
             {
                 SqlCommand command = new(sqlExpression, connection);
@@ -59,8 +58,7 @@ namespace DiscordBotDURAK
         }
         public static void AddRadio(string guildId, string radio)
         {
-            string sqlExpression =
-                $"INSERT INTO [DiscordBotDURAKDataBase].[{guildId}].[Radio] (Reference) VALUES ('{radio}');";
+            string sqlExpression = $"INSERT INTO [DiscordBotDURAKDataBase].[{guildId}].[Radio] (Reference) VALUES ('{radio}');";
             using (SqlConnection connection = new(connectionString))
             {
                 SqlCommand command = new(sqlExpression, connection);
@@ -82,8 +80,7 @@ namespace DiscordBotDURAK
         }
         public static void DeleteAdmin(string guildId, ulong adminId)
         {
-            string sqlExpression =
-                $"DELETE FROM [DiscordBotDURAKDataBase].[{guildId}].[Admins] WHERE (Admin = '{Convert.ToString(adminId)}');";
+            string sqlExpression = $"DELETE FROM [DiscordBotDURAKDataBase].[{guildId}].[Admins] WHERE (Admin = '{Convert.ToString(adminId)}');";
             using (SqlConnection connection = new(connectionString))
             {
                 SqlCommand command = new(sqlExpression, connection);
@@ -93,8 +90,7 @@ namespace DiscordBotDURAK
         }
         public static bool isAdmin(this SocketUser user, ulong guildId)
         {
-            string sqlExpression =
-                $"SELECT Admin FROM [DiscordBotDURAKDataBase].[{guildId}].[Admins] WHERE (Admin = '{Convert.ToString(user.Id)}');";
+            string sqlExpression = $"SELECT Admin FROM [DiscordBotDURAKDataBase].[{guildId}].[Admins] WHERE (Admin = '{Convert.ToString(user.Id)}');";
             using (SqlConnection connection = new(connectionString))
             {
                 SqlCommand command = new(sqlExpression, connection);
@@ -121,8 +117,7 @@ namespace DiscordBotDURAK
         public static IEnumerable<ulong> GetGuilds()
         {
             List<ulong> guilds = new();
-            string sqlExpression =
-                $"SELECT * FROM [DiscordBotDURAKDataBase].[dbo].[Guilds]";
+            string sqlExpression =$"SELECT * FROM [DiscordBotDURAKDataBase].[dbo].[Guilds]";
             using (SqlConnection connection = new(connectionString))
             {
                 SqlCommand command = new(sqlExpression, connection);
@@ -266,8 +261,7 @@ namespace DiscordBotDURAK
         }
         public static void DeleteRadio(string guildId, string reference)
         {
-            string sqlExpression =
-                $"DELETE FROM [DiscordBotDURAKDataBase].[{guildId}].[Radio] WHERE Reference = '{reference}'";
+            string sqlExpression = $"DELETE FROM [DiscordBotDURAKDataBase].[{guildId}].[Radio] WHERE Reference = '{reference}'";
             using (SqlConnection connection = new(connectionString))
             {
                 SqlCommand command = new(sqlExpression, connection);
@@ -275,15 +269,10 @@ namespace DiscordBotDURAK
                 command.ExecuteNonQuery();
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="guild"></param>
-        /// <returns>true if guild in database</returns>
+
         public static bool Check(this SocketGuild guild)
         {
-            string sqlExpression =
-                $"SELECT guild FROM [DiscordBotDURAKDataBase].[dbo].[Guilds] WHERE guild = '{guild.Id}'";
+            string sqlExpression = $"SELECT guild FROM [DiscordBotDURAKDataBase].[dbo].[Guilds] WHERE guild = '{guild.Id}'";
             using (SqlConnection connection = new(connectionString))
             {
                 SqlCommand command = new(sqlExpression, connection);

@@ -27,7 +27,6 @@ namespace DiscordBotDURAK.EthernetFunctions
             document.LoadHtml(html);
 
             var jokeNodes = document.DocumentNode.SelectNodes(@"//div[contains(@class, 'post')]");
-            int i = 0;
             string str_joke = "";
             foreach (var joke in jokeNodes)
             {

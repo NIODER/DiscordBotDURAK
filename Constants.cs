@@ -21,6 +21,7 @@ namespace Constants
 
     public static class Commands
     {
+        public static readonly string cyberShoke = $"$csgo";
         public static readonly string deleteFavorRadio = $"$delradio";
         public static readonly string favorRadio = $"$избранное";
         public static readonly string radio = $"$radio";

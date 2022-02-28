@@ -5,10 +5,12 @@ using Discord.WebSocket;
 using System.IO;
 using System.Collections.Generic;
 using EthernetFunctons.Balaboba;
-using EthernetFunctons;
 using Constants;
 using DiscordBotDURAK.EthernetFunctions;
 using System.Threading;
+using CyberShoke;
+using CyberShoke.Objects;
+using Discord.Commands;
 
 namespace DiscordBotDURAK
 {
@@ -17,7 +19,6 @@ namespace DiscordBotDURAK
         DiscordSocketClient client;
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
-        private static bool checkGuilds = true;
         public static Mutex mutex = new();
 
         private async Task MainAsync()
@@ -78,11 +79,6 @@ namespace DiscordBotDURAK
                               GetFavour(message);
                           }
 
-                          if (message.Content.StartsWith("$play"))
-                          {
-                              EnableRadio(message);
-                          }
-
                           if (message.Content.StartsWith(Commands.radio))
                           {
                               GetRadio(message);
@@ -91,11 +87,6 @@ namespace DiscordBotDURAK
                           if (message.Content.StartsWith(Commands.joke))
                           {
                               GetJoke(message);
-                          }
-
-                          if (message.Content.StartsWith(Commands.surf))
-                          {
-                              GetSurf(message);
                           }
 
                           if (message.Content.ToLower().StartsWith(Commands.quote))
@@ -136,6 +127,11 @@ namespace DiscordBotDURAK
                           if (message.Content.Contains("http"))
                           {
                               RefModeration(message);
+                          }
+
+                          if (message.Content.StartsWith(Commands.cyberShoke))
+                          {
+                              GetCSGOServer(message);
                           }
 
                           if (message.IsAuthorAdmin())
@@ -358,11 +354,670 @@ namespace DiscordBotDURAK
         #endregion
 
         #region functions
-
-        private async void EnableRadio(SocketMessage message)
+        private async void GetCSGOServer(SocketMessage message)
         {
-
+            var msg = message.Content.Split(" ");
+            string category = string.Empty;
+            try
+            {
+                category = msg[1];
+            }
+            catch (IndexOutOfRangeException)
+            {
+                string help = "1 - Aim DM\n" +
+                    "2 - AmongUs\n" +
+                    "3 - Arena\n" +
+                    "4 - AWP\n" +
+                    "5 - AWP DM\n" +
+                    "6 - BHOP\n" +
+                    "7 - Deathrun\n" +
+                    "8 - DM\n" +
+                    "9 - Duels\n" +
+                    "10 - Duels 2X2\n" +
+                    "11 - Execute\n" +
+                    "12 - HNS\n" +
+                    "13 - HSDM\n" +
+                    "14 - Jail\n" +
+                    "15 - Knife\n" +
+                    "16 - KZ\n" +
+                    "17 - Maniac\n" +
+                    "18 - Minigames\n" +
+                    "19 - MULICFGDM\n" +
+                    "20 - Pistol DM\n" +
+                    "21 - Pistol Retake\n" +
+                    "22 - Prop Hunt\n" +
+                    "23 - Public\n" +
+                    "24 - Retake\n" +
+                    "25 - Retake Classic\n" +
+                    "26 - Shoke Lobby\n" +
+                    "27 - Surf\n" +
+                    "28 - Surf Conbat\n" +
+                    "29 - Zombie Escape";
+                await message.Channel.SendMessageAsync(help);
+            }
+            string answer = string.Empty;
+            switch (category)
+            {
+                case "1":
+                    answer = GetAimDM(msg);
+                    break;
+                case "2":
+                    answer = GetAmongUs();
+                    break;
+                case "3":
+                    answer = GetArena();
+                    break;
+                case "4":
+                    answer = GetAwp(msg);
+                    break;
+                case "5":
+                    answer = GetAwpDM(msg);
+                    break;
+                case "6":
+                    answer = GetBhop(msg);
+                    break;
+                case "7":
+                    answer = GetDeathrun(msg);
+                    break;
+                case "8":
+                    answer = GetDM(msg);
+                    break;
+                case "9":
+                    answer = GetDuels(msg);
+                    break;
+                case "10":
+                    answer = GetDuplets(msg);
+                    break;
+                case "11":
+                    answer = GetExecute();
+                    break;
+                case "12":
+                    answer = GetHNS(msg);
+                    break;
+                case "13":
+                    answer = GetHSDM(msg);
+                    break;
+                case "14":
+                    answer = GetJail(msg);
+                    break;
+                case "15":
+                    answer = GetKnife();
+                    break;
+                case "16":
+                    answer = GetKZ(msg);
+                    break;
+                case "17":
+                    answer = GetManiac();
+                    break;
+                case "18":
+                    answer = GetMinigames(msg);
+                    break;
+                case "19":
+                    answer = GetMulticFGDM();
+                    break;
+                case "20":
+                    answer = GetPistolDM(msg);
+                    break;
+                case "21":
+                    answer = GetPistolRetake();
+                    break;
+                case "22":
+                    answer = GetPropHunt();
+                    break;
+                case "23":
+                    answer = GetPublic(msg);
+                    break;
+                case "24":
+                    answer = GetRetake(msg);
+                    break;
+                case "25":
+                    answer = GetRetakeClassic(msg);
+                    break;
+                case "26":
+                    answer = GetShokeLobby();
+                    break;
+                case "27":
+                    answer = GetSurf(msg);
+                    break;
+                case "28":
+                    answer = GetSurfCombat();
+                    break;
+                case "29":
+                    answer = GetZombieEscape();
+                    break;
+                default:
+                    break;
+            }
+            _ = message.Channel.SendMessageAsync(answer);
         }
+
+        #region CS:GO
+        private string GetAimDM(string[] msg)
+        {
+            CSServers cybershoke = new CSServers();
+            //CounterStrikeServers servers = new CounterStrikeServers();
+            if (msg.Length < 3)
+            {
+                return "1 - Aim DM\n2 - Pistol Aim DM";
+            }
+            switch (msg[2])
+            {
+                case "1":
+                    return cybershoke.GetAIM_DM().AIMDM.GetRandom().Info();
+                case "2":
+                    return cybershoke.GetAIM_DM().PISTOL_AIMDM.GetRandom().Info();
+                default:
+                    return "1 - Aim DM\n2 - Pistol Aim DM";
+            }
+        }
+
+        private string GetAmongUs() => new CSServers().GetAMONGUS().GetRandom().Info();
+
+        private string GetArena() => new CSServers().GetARENA().GetRandom().Info();
+
+        private string GetAwp(string[] msg)
+        {
+            CSServers cybershoke = new();
+            if (msg.Length < 3)
+            {
+                return "1 - AWP CANNONS\n2 - ONLY AWP LEGO 2\n3 - AWP SERVERS";
+            }
+            switch (msg[2])
+            {
+                case "1":
+                    return cybershoke.GetAWP().AWP_CANNONS.GetRandom().Info();
+                case "2":
+                    return cybershoke.GetAWP().ONLY_AWP_LEGO_2.GetRandom().Info();
+                case "3":
+                    return cybershoke.GetAWP().AWP_SERVERS.GetRandom().Info();
+                default:
+                    return "1 - AWP CANNONS\n2 - ONLY AWP LEGO 2\n3 - AWP SERVERS";
+            }
+        }
+
+        private string GetAwpDM(string[] msg)
+        {
+            CSServers cyberShoke = new();
+            if (msg.Length < 3)
+            {
+                return "1 - AWPDM LITE\n2 - AWPDM\n3 - NOSCOPEDM";
+            }
+            switch (msg[2])
+            {
+                case "1":
+                    return cyberShoke.GetAWPDM().AWPDM_LITE.GetRandom().Info();
+                case "2":
+                    return cyberShoke.GetAWPDM().AWPDM.GetRandom().Info();
+                case "3":
+                    return cyberShoke.GetAWPDM().NOSCOPEDM.GetRandom().Info();
+                default:
+                    return "1 - AWPDM LITE\n2 - AWPDM\n3 - NOSCOPEDM";
+            }
+        }
+
+        private string GetBhop(string[] msg)
+        {
+            CSServers cybershoke = new();
+            if (msg.Length < 3)
+            {
+                return "1 - 64 tick\n2 - easy\n3 - medium\n4 - hard\n5 - legendary";
+            }
+            switch (msg[2])
+            {
+                case "1":
+                    return cybershoke.GetBHOP().TICK.GetRandom().Info();
+                case "2":
+                    return cybershoke.GetBHOP().EASY.GetRandom().Info();
+                case "3":
+                    return cybershoke.GetBHOP().MEDIUM.GetRandom().Info();
+                case "4":
+                    return cybershoke.GetBHOP().HARD.GetRandom().Info();
+                case "5":
+                    return cybershoke.GetBHOP().LEGEMDARY.GetRandom().Info();
+                default:
+                    return "1 - 64 tick\n2 - easy\n3 - medium\n4 - hard\n5 - legendary";
+            }
+        }
+
+        private string GetDeathrun(string[] msg)
+        {
+            CSServers cybershoke = new();
+            if (msg.Length < 3)
+            {
+                return "1 - EASY\n2 - WARMUP";
+            }
+            switch (msg[2])
+            {
+                case "1":
+                    return cybershoke.GetDEATHRUN().EASY.GetRandom().Info();
+                case "2":
+                    return cybershoke.GetDEATHRUN().WARMUP.GetRandom().Info();
+                default:
+                    return "1 - EASY\n2 - WARMUP";
+            }
+        }
+
+        private string GetDM(string[] msg)
+        {
+            CSServers cyberShoke = new();
+            if (msg.Length < 3)
+            {
+                return "1 - 18 SLOTS LITE 1-3LVL FACEIT\n2 - 16 SLOTS LITE 1-3LVL FACEIT\n" +
+                    "3 - 14 SLOTS LITE 1-3LVL FACEIT\n4 - 20 SLOTS LITE\n5 - 18 SLOTS LITE\n6 - 18 SLOTS\n" +
+                    "7 - 16 SLOTS LITE\n8 - 16 SLOTS\n9 - NOAWP";
+            }
+            switch (msg[2])
+            {
+                case "1":
+                    return cyberShoke.GetDM().EASY18.GetRandom().Info();
+                case "2":
+                    return cyberShoke.GetDM().EASY16.GetRandom().Info();
+                case "3":
+                    return cyberShoke.GetDM().EASY14.GetRandom().Info();
+                case "4":
+                    return cyberShoke.GetDM().LITE20.GetRandom().Info();
+                case "5":
+                    return cyberShoke.GetDM().LITE18.GetRandom().Info();
+                case "6":
+                    return cyberShoke.GetDM().SLOTS18.GetRandom().Info();
+                case "7":
+                    return cyberShoke.GetDM().LITE16.GetRandom().Info();
+                case "8":
+                    return cyberShoke.GetDM().SLOTS16.GetRandom().Info();
+                case "9":
+                    return cyberShoke.GetDM().NOAWP.GetRandom().Info();
+                default:
+                    return "1 - 18 SLOTS LITE 1-3LVL FACEIT\n2 - 16 SLOTS LITE 1-3LVL FACEIT\n" +
+                        "3 - 14 SLOTS LITE 1-3LVL FACEIT\n4 - 20 SLOTS LITE\n5 - 18 SLOTS LITE\n6 - 18 SLOTS\n" +
+                        "7 - 16 SLOTS LITE\n8 - 16 SLOTS\n9 - NOAWP";
+            }
+        }
+
+        private string GetDuels(string[] msg)
+        {
+            CSServers cyberShoke = new();
+            if (msg.Length < 3)
+            {
+                return "1 - ONLY MIRAGE\n2 - ONLY DUST2\n3 - ALL MAPS";
+            }
+            switch (msg[2])
+            {
+                case "1":
+                    return cyberShoke.GetDUELS().ONLY_MIRAGE.GetRandom().Info();
+                case "2":
+                    return cyberShoke.GetDUELS().ONLY_DUST2.GetRandom().Info();
+                case "3":
+                    return cyberShoke.GetDUELS().ALL_MAPS.GetRandom().Info();
+                default:
+                    return "1 - ONLY MIRAGE\n2 - ONLY DUST2\n3 - ALL MAPS";
+            }
+        }
+
+        private string GetDuplets(string[] msg)
+        {
+            CSServers cyberShoke = new();
+            if (msg.Length < 3)
+            {
+                return "1 - ONLY MIRAGE\n2 - ONLY DUST2\n3 - ALL MAPS";
+            }
+            switch (msg[2])
+            {
+                case "1":
+                    return cyberShoke.GetDUELS2X2().ONLY_MIRAGE.GetRandom().Info();
+                case "2":
+                    return cyberShoke.GetDUELS2X2().ONLY_DUST2.GetRandom().Info();
+                case "3":
+                    return cyberShoke.GetDUELS2X2().ALL_MAPS.GetRandom().Info();
+                default:
+                    return "1 - ONLY MIRAGE\n2 - ONLY DUST2\n3 - ALL MAPS";
+            }
+        }
+
+        private string GetExecute() => new CSServers().GetEXECUTE().GetRandom().Info();
+
+        private string GetHNS(string[] msg)
+        {
+            CSServers cyberShoke = new();
+            if (msg.Length < 3)
+            {
+                return "1 - HNS SERVERS\n2 - HNS NO RULES\n3 - HNS TRAINING";
+            }
+            IEnumerable<Server> list;
+            switch (msg[2])
+            {
+                case "1":
+                    list = cyberShoke.GetHNS().HNS_SERVERS;
+                    break;
+                case "2":
+                    list = cyberShoke.GetHNS().HNS_NO_RULES;
+                    break;
+                case "3":
+                    list = cyberShoke.GetHNS().HNS_TRAINING;
+                    break;
+                default:
+                    return "1 - HNS SERVERS\n2 - HNS NO RULES\n3 - HNS TRAINING";
+            }
+            return list.GetRandom().Info();
+        }
+
+        private string GetHSDM(string[] msg)
+        {
+            CSServers servers = new();
+            if (msg.Length < 3)
+            {
+                return "1 - HSDM LITE\n2 - HSDM\n3 - HSDM ONETAP";
+            }
+            IEnumerable<Server> list;
+            switch (msg[2])
+            {
+                case "1":
+                    list = servers.GetHSDM().HSDM_LITE;
+                    break;
+                case "2":
+                    list = servers.GetHSDM().HSDM;
+                    break;
+                case "3":
+                    list = servers.GetHSDM().HSDM_ONETAP;
+                    break;
+                default:
+                    return "1 - HSDM LITE\n2 - HSDM\n3 - HSDM ONETAP";
+            }
+            return list.GetRandom().Info();
+        }
+
+        private string GetJail(string[] msg)
+        {
+            CSServers servers = new();
+            if (msg.Length < 3)
+            {
+                return "1 - CT 16\n2 - CT 14\n3 - CT 0";
+            }
+            IEnumerable<Server> list;
+            switch (msg[2])
+            {
+                case "1":
+                    list = servers.GetJAIL().CT_16;
+                    break;
+                case "2":
+                    list = servers.GetJAIL().CT_14;
+                    break;
+                case "3":
+                    list = servers.GetJAIL().CT_0;
+                    break;
+                default:
+                    return "1 - CT 16\n2 - CT 14\n3 - CT 0";
+            }
+            return list.GetRandom().Info();
+        }
+
+        private string GetKnife() => new CSServers().GetKNIFE().GetRandom().Info();
+
+        private string GetKZ(string[] msg)
+        {
+            CSServers servers = new();
+            if (msg.Length < 3)
+            {
+                return "1 - KZTimer - TIER 1-2\n" +
+                    "GOKZ - TIER 1-2\n" +
+                    "KZTimer - TIER 3-4\n" +
+                    "GOKZ - TIER 3-4\n" +
+                    "KZTimer - TIER 5-6\n" +
+                    "GOKZ - TIER 5-6";
+            }
+            IEnumerable<Server> list;
+            switch (msg[2])
+            {
+                case "1":
+                    list = servers.GetKZ().TIMER_EASY;
+                    break;
+                case "2":
+                    list = servers.GetKZ().GO_EASY;
+                    break;
+                case "3":
+                    list = servers.GetKZ().TIMER_MEDIUM;
+                    break;
+                case "4":
+                    list = servers.GetKZ().GO_MEDIUM;
+                    break;
+                case "5":
+                    list = servers.GetKZ().TIMER_HARD;
+                    break;
+                case "6":
+                    list = servers.GetKZ().GO_HARD;
+                    break;
+                default:
+                    return "1 - KZTimer - TIER 1-2\n" +
+                    "GOKZ - TIER 1-2\n" +
+                    "KZTimer - TIER 3-4\n" +
+                    "GOKZ - TIER 3-4\n" +
+                    "KZTimer - TIER 5-6\n" +
+                    "GOKZ - TIER 5-6";
+            }
+            return list.GetRandom().Info();
+        }
+
+        private string GetManiac() => new CSServers().GetMANIAC().GetRandom().Info();
+
+        private string GetMinigames(string[] msg)
+        {
+            CSServers servers = new();
+            if (msg.Length < 3)
+            {
+                return "1 - FUN MAPS\n2 - BATTLE MAPS";
+            }
+            IEnumerable<Server> list;
+            switch (msg[2])
+            {
+                case "1":
+                    list = servers.GetMINIGAMES().FUN_MAPS;
+                    break;
+                case "2":
+                    list = servers.GetMINIGAMES().BATTLE_MAPS;
+                    break;
+                default:
+                    return "1 - FUN MAPS\n2 - BATTLE MAPS";
+            }
+            return list.GetRandom().Info();
+        }
+
+        private string GetMulticFGDM() => new CSServers().GetMULTICFGDM().GetRandom().Info();
+
+        private string GetPistolDM(string[] msg)
+        {
+            CSServers servers = new();
+            if (msg.Length < 3)
+            {
+                return "1 - PISTOL HSDM\n2 - PISTOLDM LITE\n3 - PISTOLDM";
+            }
+            IEnumerable<Server> list;
+            switch (msg[2])
+            {
+                case "1":
+                    list = servers.GetPISTOLDM().PISTOL_HSDM;
+                    break;
+                case "2":
+                    list = servers.GetPISTOLDM().PISTOLDM_LITE;
+                    break;
+                case "3":
+                    list = servers.GetPISTOLDM().PISTOLDM;
+                    break;
+                default:
+                    return "1 - PISTOL HSDM\n2 - PISTOLDM LITE\n3 - PISTOLDM";
+            }
+            return list.GetRandom().Info();
+        }
+
+        private string GetPistolRetake() => new CSServers().GetPISTOLRETAKE().GetRandom().Info();
+
+        private string GetPropHunt()
+        {
+            return new CSServers().GetPROPHUNT().GetRandom().Info();
+        }
+
+        private string GetPublic(string[] msg)
+        {
+            CSServers servers = new();
+            if (msg.Length < 3)
+            {
+                return "1 - ONLY DUST2\n" +
+                    "2 - ONLY MIRAGE\n" +
+                    "3 - NO LIMIT\n" +
+                    "4 - COMPETITIVE MAPS\n" +
+                    "5 - WH ON\n" +
+                    "6 - ALL MAPS\n" +
+                    "7 - DESTRUCTIBLE INFERNO";
+            }
+            IEnumerable<Server> list;
+            switch (msg[2])
+            {
+                case "1":
+                    list = servers.GetPUBLIC().ONLY_DUST2;
+                    break;
+                case "2":
+                    list = servers.GetPUBLIC().ONLY_MIRAGE;
+                    break;
+                case "3":
+                    list = servers.GetPUBLIC().NO_LIMIT;
+                    break;
+                case "4":
+                    list = servers.GetPUBLIC().COMPETITIVE_MAPS;
+                    break;
+                case "5":
+                    list = servers.GetPUBLIC().WH_ON;
+                    break;
+                case "6":
+                    list = servers.GetPUBLIC().ALL_MAPS;
+                    break;
+                case "7":
+                    list = servers.GetPUBLIC().DESTRUCTIBLE_INFERNO;
+                    break;
+                default:
+                    return "1 - ONLY DUST2\n" +
+                    "2 - ONLY MIRAGE\n" +
+                    "3 - NO LIMIT\n" +
+                    "4 - COMPETITIVE MAPS\n" +
+                    "5 - WH ON\n" +
+                    "6 - ALL MAPS\n" +
+                    "7 - DESTRUCTIBLE INFERNO";
+            }
+            return list.GetRandom().Info();
+        }
+
+        private string GetRetake(string[] msg)
+        {
+            CSServers servers = new();
+            if (msg.Length < 3)
+            {
+                return "1 - 1-3 LVL FACEIT\n" +
+                    "2 - 8-10 LVL FACEIT\n" +
+                    "3 - 9 SLOTS\n" +
+                    "4 - 7 SLOTS";
+            }
+            IEnumerable<Server> list;
+            switch (msg[2])
+            {
+                case "1":
+                    list = servers.GetRETAKE().EASY;
+                    break;
+                case "2":
+                    list = servers.GetRETAKE().HARD;
+                    break;
+                case "3":
+                    list = servers.GetRETAKE().SLOTS9;
+                    break;
+                case "4":
+                    list = servers.GetRETAKE().SLOTS7;
+                    break;
+                default:
+                    return "1 - 1-3 LVL FACEIT\n" +
+                    "2 - 8-10 LVL FACEIT\n" +
+                    "3 - 9 SLOTS\n" +
+                    "4 - 7 SLOTS";
+            }
+            return list.GetRandom().Info();
+        }
+
+        private string GetRetakeClassic(string[] msg)
+        {
+            CSServers servers = new();
+            if (msg.Length < 3)
+            {
+                return "1 - 1-3 LVL FACEIT\n" +
+                    "2 - 4-7 LVL FACEIT\n" +
+                    "3 - 8-10 LVL FACEIT\n" +
+                    "4 - OPEN TO ALL - 9 SLOTS\n" +
+                    "5 - OPEN TO ALL - 7 SLOTS";
+            }
+            IEnumerable<Server> list;
+            switch (msg[2])
+            {
+                case "1":
+                    list = servers.GetRETAKECLASSIC().EASY;
+                    break;
+                case "2":
+                    list = servers.GetRETAKECLASSIC().MEDIUM;
+                    break;
+                case "3":
+                    list = servers.GetRETAKECLASSIC().HARD;
+                    break;
+                case "4":
+                    list = servers.GetRETAKECLASSIC().SLOTS9;
+                    break;
+                case "5":
+                    list = servers.GetRETAKECLASSIC().SLOTS7;
+                    break;
+                default:
+                    return "1 - 1-3 LVL FACEIT\n" +
+                    "2 - 8-10 LVL FACEIT\n" +
+                    "3 - 4-7 LVL FACEIT\n" +
+                    "4 - OPEN TO ALL - 9 SLOTS\n" +
+                    "5 - OPEN TO ALL - 7 SLOTS";
+            }
+            return list.GetRandom().Info();
+        }
+
+        private string GetShokeLobby() => new CSServers().GetSHOKELOBBY().GetRandom().Info();
+
+        private string GetSurf(string[] msg)
+        {
+            if (msg.Length < 3)
+            {
+                return "1 - TIER 1 - BEGINNER\n" +
+                    "2 - TIER 1-2 - EASY\n" +
+                    "3 - TIER 1-3 - NORMAL\n" +
+                    "4 - TIER 3-4 - MEDIUM\n" +
+                    "5 - TIER 3-5 - HARD\n" +
+                    "6 - TIER 4-8 - TOP 350";
+            }
+            CSServers servers = new();
+            switch (msg[2])
+            {
+                case "1":
+                    return servers.GetSURF().BEGINNER.GetRandom().Info();
+                case "2":
+                    return servers.GetSURF().EASY.GetRandom().Info();
+                case "3":
+                    return servers.GetSURF().NORMAL.GetRandom().Info();
+                case "4":
+                    return servers.GetSURF().MEDIUM.GetRandom().Info();
+                case "5":
+                    return servers.GetSURF().HARD.GetRandom().Info();
+                case "6":
+                    return servers.GetSURF().TOP.GetRandom().Info();
+                default:
+                    return "1 - TIER 1 - BEGINNER\n" +
+                    "2 - TIER 1-2 - EASY\n" +
+                    "3 - TIER 1-3 - NORMAL\n" +
+                    "4 - TIER 3-4 - MEDIUM\n" +
+                    "5 - TIER 3-5 - HARD\n" +
+                    "6 - TIER 4-8 - TOP 350";
+            }
+        }
+
+        private string GetSurfCombat() => new CSServers().GetSURFCOMBAT().GetRandom().Info();
+
+        private string GetZombieEscape() => new CSServers().GetZOMBIEESCAPE().GetRandom().Info();
+        #endregion
 
         private async void DeleteFavour(SocketMessage message)
         {
@@ -418,13 +1073,6 @@ namespace DiscordBotDURAK
             string joke = Joke.GetJoke();
             await message.Channel.SendMessageAsync(joke);
             await Log(new LogMessage(LogSeverity.Info, Sources.command, $"GetJoke() : {joke}"));
-        }
-
-        private async void GetSurf(SocketMessage message)
-        {
-            string address = Surf.GetAddress();
-            await message.Channel.SendMessageAsync(address);
-            await Log(new LogMessage(LogSeverity.Info, Sources.command, $"GetSurf() : {address}"));
         }
 
         private async void MortarQuote(SocketMessage message)
@@ -558,6 +1206,10 @@ namespace DiscordBotDURAK
 
         private async void SHITPOST_Func(SocketMessage message)
         {
+            if (message.Channel.IsReferences())
+            {
+                return;
+            }
             await message.Channel.SendMessageAsync(
                 $"{message.Author.Username}, {Balaboba.Say(message.Content)}");
         }

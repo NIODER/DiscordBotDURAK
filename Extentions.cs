@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Discord;
+using CyberShoke.Objects;
 using Discord.WebSocket;
 
 namespace DiscordBotDURAK
@@ -15,5 +13,7 @@ namespace DiscordBotDURAK
         public static string GuildId(this SocketMessage message) => Convert.ToString(((SocketGuildChannel)message.Channel).Guild.Id);
         public static bool IsReferences(this ISocketMessageChannel channel) => ChannelSeverity.References == MyDatabase.ChannelType(channel);
         public static bool IsAuthorAdmin(this SocketMessage message) => message.Author.isAdmin(((SocketGuildChannel)message.Channel).Guild.Id);
+        public static Server GetRandom(this IEnumerable<Server> list) => list.ElementAt(new Random().Next(list.Count() - 1));
+        public static string Info(this Server server) => $"{server.category} {server.country} {server.players}/{server.maxplayers}\nconnect {server.ip}:{server.port}";
     }
 }

@@ -11,6 +11,7 @@ using System.Threading;
 using CyberShoke;
 using CyberShoke.Objects;
 using Discord.Commands;
+using System.Linq;
 
 namespace DiscordBotDURAK
 {
@@ -19,12 +20,12 @@ namespace DiscordBotDURAK
         DiscordSocketClient client;
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
-        public static Mutex mutex = new();
 
         private async Task MainAsync()
         {
             client = new DiscordSocketClient();
             client.MessageReceived += CommandsHandler;
+            client.SelectMenuExecuted += SelectMenuHandler;
             client.Log += Log;
 
             string token = null;
@@ -47,149 +48,279 @@ namespace DiscordBotDURAK
             return Task.CompletedTask;
         }
 
-        private Task CommandsHandler(SocketMessage message)
+        public async Task SelectMenuHandler(SocketMessageComponent component)
+        {
+            switch (component.Data.CustomId)
+            {
+                case "cs-main":
+                    SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder()
+                        .WithMinValues(1)
+                        .WithMaxValues(1);
+                    switch ((CybershokeCategories)Enum.Parse(typeof(CybershokeCategories), component.Data.Values.ElementAt(0)))
+                    {
+                        case CybershokeCategories.DUELS2X2:
+                            selectMenuBuilder
+                                .WithCustomId("DUELS2X2")
+                                .AddOption("ONLY MIRAGE", "only-mirage")
+                                .AddOption("ONLY DUST2", "only-dust")
+                                .AddOption("ALL MAPS", "all-maps");
+                            break;
+                        case CybershokeCategories.DUELS:
+                            selectMenuBuilder
+                                .WithCustomId("DUELS")
+                                .AddOption("ONLY MIRAGE", "only-mirage")
+                                .AddOption("ONLY DUST2", "only-dust")
+                                .AddOption("ALL MAPS", "all-maps");
+                            break;
+                        case CybershokeCategories.RETAKE:
+                            selectMenuBuilder
+                                .WithCustomId("RETAKE")
+                                .AddOption("1-3 LVL FACEIT", "easy")
+                                .AddOption("8-10 LVL FACEIT", "hard")
+                                .AddOption("9 SLOTS", "9slots")
+                                .AddOption("7 SLOTS", "7slots");
+                            break;
+                        case CybershokeCategories.RETAKECLASSIC:
+                            selectMenuBuilder
+                                .WithCustomId("RETAKECLASSIC")
+                                .AddOption("1-3 LVL FACEIT", "easy")
+                                .AddOption("4-7 LVL FACEIT", "middle")
+                                .AddOption("8-10 LVL FACEIT", "hard")
+                                .AddOption("OPEN TO ALL - 9 SLOTS", "9slots")
+                                .AddOption("OPEN TO ALL - 7 SLOTS", "7slots");
+                            break;
+                        case CybershokeCategories.DM:
+                            selectMenuBuilder.WithCustomId("DM")
+                                .AddOption("18 SLOTS LITE 1-3LVL FACEIT", "18easy")
+                                .AddOption("16 SLOTS LITE 1-3LVL FACEIT", "16easy")
+                                .AddOption("14 SLOTS LITE 1-3LVL FACEIT", "14easy")
+                                .AddOption("20 SLOTS LITE", "20lite")
+                                .AddOption("18 SLOTS LITE", "18lite")
+                                .AddOption("16 SLOTS LITE", "16lite")
+                                .AddOption("18 SLOTS", "18slots")
+                                .AddOption("16 SLOTS", "16slots")
+                                .AddOption("NOAWP", "noawp");
+                            break;
+                        case CybershokeCategories.HSDM:
+                            selectMenuBuilder.WithCustomId("HSDM")
+                                .AddOption("HSDM LITE", "lite")
+                                .AddOption("HSDM", "classic")
+                                .AddOption("HSDM ONETAP", "onetap");
+                            break;
+                        case CybershokeCategories.PISTOLDM:
+                            selectMenuBuilder.WithCustomId("PISTOLDM")
+                                .AddOption("PISTOL HSDM", "hsdm")
+                                .AddOption("PISTOLDM LITE", "lite")
+                                .AddOption("PISTOLDM", "classic");
+                            break;
+                        case CybershokeCategories.MULTICFGDM:
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetMULTICFGDM().GetRandom().Info());
+                            return;
+                        case CybershokeCategories.AWPDM:
+                            selectMenuBuilder.WithCustomId("AWPDM")
+                                .AddOption("AWPDM LITE", "lite")
+                                .AddOption("AWPDM", "classic")
+                                .AddOption("NOSCOPEDM", "noscope");
+                            break;
+                        case CybershokeCategories.AIMDM:
+                            selectMenuBuilder.WithCustomId("AIMDM")
+                                .AddOption("AIMDM", "classic")
+                                .AddOption("PISTOL AIMDM", "pistol");
+                            break;
+                        case CybershokeCategories.EXECUTE:
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetEXECUTE().GetRandom().Info());
+                            return;
+                        case CybershokeCategories.PISTOLRETAKE:
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetPISTOLRETAKE().GetRandom().Info());
+                            return;
+                        case CybershokeCategories.SURF:
+                            selectMenuBuilder.WithCustomId("SURF")
+                                .AddOption("TIER 1 - BEGINNER", "beginner")
+                                .AddOption("TIER 1-2 - EASY", "easy")
+                                .AddOption("TIER 1-3 - NORMAL", "normal")
+                                .AddOption("TIER 3-4 - MEDIUM", "medium")
+                                .AddOption("TIER 3-5 - HARD", "hard")
+                                .AddOption("TIER 4-8 - TOP 350", "top");
+                            break;
+                        case CybershokeCategories.BHOP:
+                            selectMenuBuilder.WithCustomId("BHOP")
+                                .AddOption("TIER 1-2 - EASY", "easy")
+                                .AddOption("TIER 3-4 - MEDIUM", "medium")
+                                .AddOption("TIER 5-6 - HARD", "hard")
+                                .AddOption("LEGENDARY MAPS", "legendary")
+                                .AddOption("64 TICK", "tick");
+                            break;
+                        case CybershokeCategories.KZ:
+                            selectMenuBuilder.WithCustomId("KZ")
+                                .AddOption("KZTimer - TIER 1-2", "timer-easy")
+                                .AddOption("GOKZ - TIER 1-2", "go-easy")
+                                .AddOption("KZTimer - TIER 3-4", "timer-middle")
+                                .AddOption("GOKZ - TIER 3-4", "go-middle")
+                                .AddOption("KZTimer - TIER 5-6", "timer-hard")
+                                .AddOption("GOKZ - TIER 5-6", "go-hard");
+                            break;
+                        case CybershokeCategories.ARENA:
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetARENA().GetRandom().Info());
+                            return;
+                        case CybershokeCategories.PUBLIC:
+                            selectMenuBuilder.WithCustomId("PUBLIC")
+                                .AddOption("ONLY DUST2", "only-dust")
+                                .AddOption("ONLY MIRAGE", "only-mirage")
+                                .AddOption("NO LIMIT", "no-limit")
+                                .AddOption("COMPETITIVE MAPS", "competitive")
+                                .AddOption("WH ON", "wh")
+                                .AddOption("ALL MAPS", "all-maps")
+                                .AddOption("DESTRUCTIBLE INFERNO", "destr-inferno");
+                            break;
+                        case CybershokeCategories.AWP:
+                            selectMenuBuilder.WithCustomId("AWP")
+                                .AddOption("AWP CANNONS", "cannons")
+                                .AddOption("ONLY AWP LEGO 2", "lego")
+                                .AddOption("AWP SERVERS", "servers");
+                            break;
+                        case CybershokeCategories.MANIAC:
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetMANIAC().GetRandom().Info());
+                            return;
+                        case CybershokeCategories.PROPHUNT:
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetPROPHUNT().GetRandom().Info());
+                            return;
+                        case CybershokeCategories.HNS:
+                            selectMenuBuilder.WithCustomId("HNS")
+                                .AddOption("HNS SERVERS", "servers")
+                                .AddOption("HNS NO RULES", "no-rules")
+                                .AddOption("HNS TRAINING", "training");
+                            break;
+                        case CybershokeCategories.KNIFE:
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetKNIFE().GetRandom().Info());
+                            return;
+                        default:
+                            break;
+                    }
+                    ComponentBuilder componentBuilder = new ComponentBuilder().WithSelectMenu(selectMenuBuilder);
+                    await component.Channel.SendMessageAsync("", components: componentBuilder.Build());
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private async Task CommandsHandler(SocketMessage message)
         {
             CheckGuilds(client.Guilds);
-            if (!message.Channel.isDirect())
+            if (!message.Channel.isDirect() && message.Channel.ChannelType() == ChannelSeverity.NoSuchChannel)
             {
-                if (message.Channel.ChannelType() == ChannelSeverity.NoSuchChannel)
-                {
-                    MyDatabase.AddChannel(message.GuildId(), message.Channel.Id);
-                    message.Channel.SendMessageAsync("Этот канал помечен типом \"флуд\", чтобы " +
-                        "показать сводку типов, а также узнать, как изменить тип " +
-                        "напишите $help");
-                }
+                MyDatabase.AddChannel(message.GuildId(), message.Channel.Id);
+                await message.Channel.SendMessageAsync("Этот канал помечен типом \"флуд\", чтобы " +
+                    "показать сводку типов, а также узнать, как изменить тип " +
+                    "напишите $help");
             }
             if (CheckChannel(message))
             {
-                if (message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0)
-                {
-                    if (!message.Channel.IsReferences())
-                    {
-                        _ = DeleteMessageAsync(message, enableTimer: true);
-                    }
-                }
-
-                _ = Task.Run(() =>
-                  {
-                      if (!message.Author.IsBot)
-                      {
-                          if (message.Content.StartsWith(Commands.favorRadio))
-                          {
-                              GetFavour(message);
-                          }
-
-                          if (message.Content.StartsWith(Commands.radio))
-                          {
-                              GetRadio(message);
-                          }
-
-                          if (message.Content.StartsWith(Commands.joke))
-                          {
-                              GetJoke(message);
-                          }
-
-                          if (message.Content.ToLower().StartsWith(Commands.quote))
-                          {
-                              MortarQuote(message);
-                          }
-
-                          if (message.Content.StartsWith(Commands.search))
-                          {
-                              SearchMessages(message);
-                          }
-
-                          if (message.Content.StartsWith(Commands.help))
-                          {
-                              CommandsHelp(message);
-                          }
-
-                          if (message.Content.ToLower().StartsWith(Commands.random))
-                          {
-                              RAND_Func(message);
-                          }
-
-                          if (message.Content.ToLower().Contains(Commands.decide))
-                          {
-                              Desider(message);
-                          }
-
-                          if (message.Content == Commands.id)
-                          {
-                              SendId(message);
-                          }
-
-                          if (RandomMessages.TriggerCheck(message.Content.ToLower()))
-                          {
-                              SHITPOST_Func(message);
-                          }
-
-                          if (message.Content.Contains("http"))
-                          {
-                              RefModeration(message);
-                          }
-
-                          if (message.Content.StartsWith(Commands.cyberShoke))
-                          {
-                              GetCSGOServer(message);
-                          }
-
-                          if (message.IsAuthorAdmin())
-                          {
-                              if (message.Content.StartsWith(Commands.deleteFavorRadio))
-                              {
-                                  DeleteFavour(message);
-                              }
-
-                              if (message.Content.StartsWith(Commands.setRadio))
-                              {
-                                  SetFavour(message);
-                              }
-
-                              if (message.Content.StartsWith(Commands.joinedAt))
-                              {
-                                  WhenJoined(message);
-                              }
-
-                              if (message.Content.ToLower() == Commands.owner)
-                              {
-                                  OwnerHelp(message);
-                              }
-
-                              if (message.Content.StartsWith(Commands.setChannelType))
-                              {
-                                  SetChannelType(message);
-                              }
-
-                              if (message.Content.ToLower().StartsWith(Commands.spam))
-                              {
-                                  SPAM_Func(message);
-                              }
-
-                              if (message.Content.ToLower().StartsWith(Commands.delete))
-                              {
-                                  DeleteFunc(message);
-                              }
-
-                              if (message.Content.ToLower().StartsWith(Commands.moderate))
-                              {
-                                  Moderate(message);
-                              }
-
-                              if (message.Content.ToLower().Contains(Commands.clean))
-                              {
-                                  Clear(message, Commands.clean);
-                              }
-
-                              if (message.Content.StartsWith(Commands.giveAdmin))
-                              {
-                                  GiveAdmin(message);
-                              }
-                          }
-                      }
-                  });
+                return;
             }
-            return Task.CompletedTask;
+            if ((message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0) && !message.Channel.IsReferences())
+            {
+                await DeleteMessageAsync(message, enableTimer: true);
+            }
+            if (message.Author.IsBot)
+            {
+                return;
+            }
+
+            if (message.Content.StartsWith(Commands.radio))
+            {
+                GetRadio(message);
+            }
+            if (message.Content.StartsWith(Commands.joke))
+            {
+                GetJoke(message);
+            }
+            if (message.Content.ToLower().StartsWith(Commands.quote))
+            {
+                MortarQuote(message);
+            }
+            if (message.Content.StartsWith(Commands.search))
+            {
+                SearchMessages(message);
+            }
+            if (message.Content.StartsWith(Commands.help))
+            {
+                CommandsHelp(message);
+            }
+            if (message.Content.ToLower().StartsWith(Commands.random))
+            {
+                RAND_Func(message);
+            }
+            if (message.Content.ToLower().Contains(Commands.decide))
+            {
+                Desider(message);
+            }
+            if (message.Content == Commands.id)
+            {
+                SendId(message);
+            }
+            if (RandomMessages.TriggerCheck(message.Content.ToLower()))
+            {
+                SHITPOST_Func(message);
+            }
+            if (message.Content.Contains("http"))
+            {
+                RefModeration(message);
+            }
+            if (message.Content.StartsWith(Commands.cyberShoke))
+            {
+                GetCSGOServer(message);
+            }
+            if (message.IsAuthorAdmin())
+            {
+                if (message.Content.StartsWith(Commands.deleteFavorRadio))
+                {
+                    DeleteFavour(message);
+                }
+                if (message.Content.StartsWith(Commands.setRadio))
+                {
+                    SetFavour(message);
+                }
+                if (message.Content.StartsWith(Commands.joinedAt))
+                {
+                    WhenJoined(message);
+                }
+                if (message.Content.ToLower() == Commands.owner)
+                {
+                    OwnerHelp(message);
+                }
+                if (message.Content.StartsWith(Commands.setChannelType))
+                {
+                    SetChannelType(message);
+                }
+                if (message.Content.ToLower().StartsWith(Commands.spam))
+                {
+                    SPAM_Func(message);
+                }
+                if (message.Content.ToLower().StartsWith(Commands.delete))
+                {
+                    DeleteFunc(message);
+                }
+                if (message.Content.ToLower().StartsWith(Commands.moderate))
+                {
+                    Moderate(message);
+                }
+                if (message.Content.ToLower().Contains(Commands.clean))
+                {
+                    Clear(message, Commands.clean);
+                }
+                if (message.Content.StartsWith(Commands.giveAdmin))
+                {
+                    GiveAdmin(message);
+                }
+            }
         }
 
         #region internal
@@ -356,146 +487,35 @@ namespace DiscordBotDURAK
         #region functions
         private async void GetCSGOServer(SocketMessage message)
         {
-            var msg = message.Content.Split(" ");
-            string category = string.Empty;
-            try
+            SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder()
+                .WithPlaceholder("Выберите режим")
+                .WithCustomId("cs-main")
+                .WithMinValues(1)
+                .WithMaxValues(1);
+
+            string banned = "AMONGUS MINIGAMES SURFCOMBAT JAIL DEATHRUN";
+            var listmodes = new CSServers().Listmodes;
+
+            foreach (var item in banned.Split(" "))
             {
-                category = msg[1];
+                listmodes.Remove(item);
             }
-            catch (IndexOutOfRangeException)
+
+            foreach (var item in listmodes)
             {
-                string help = "1 - Aim DM\n" +
-                    "2 - AmongUs\n" +
-                    "3 - Arena\n" +
-                    "4 - AWP\n" +
-                    "5 - AWP DM\n" +
-                    "6 - BHOP\n" +
-                    "7 - Deathrun\n" +
-                    "8 - DM\n" +
-                    "9 - Duels\n" +
-                    "10 - Duels 2X2\n" +
-                    "11 - Execute\n" +
-                    "12 - HNS\n" +
-                    "13 - HSDM\n" +
-                    "14 - Jail\n" +
-                    "15 - Knife\n" +
-                    "16 - KZ\n" +
-                    "17 - Maniac\n" +
-                    "18 - Minigames\n" +
-                    "19 - MULICFGDM\n" +
-                    "20 - Pistol DM\n" +
-                    "21 - Pistol Retake\n" +
-                    "22 - Prop Hunt\n" +
-                    "23 - Public\n" +
-                    "24 - Retake\n" +
-                    "25 - Retake Classic\n" +
-                    "26 - Shoke Lobby\n" +
-                    "27 - Surf\n" +
-                    "28 - Surf Conbat\n" +
-                    "29 - Zombie Escape";
-                await message.Channel.SendMessageAsync(help);
+                selectMenuBuilder.AddOption(label: item, value: item);
             }
-            string answer = string.Empty;
-            switch (category)
-            {
-                case "1":
-                    answer = GetAimDM(msg);
-                    break;
-                case "2":
-                    answer = GetAmongUs();
-                    break;
-                case "3":
-                    answer = GetArena();
-                    break;
-                case "4":
-                    answer = GetAwp(msg);
-                    break;
-                case "5":
-                    answer = GetAwpDM(msg);
-                    break;
-                case "6":
-                    answer = GetBhop(msg);
-                    break;
-                case "7":
-                    answer = GetDeathrun(msg);
-                    break;
-                case "8":
-                    answer = GetDM(msg);
-                    break;
-                case "9":
-                    answer = GetDuels(msg);
-                    break;
-                case "10":
-                    answer = GetDuplets(msg);
-                    break;
-                case "11":
-                    answer = GetExecute();
-                    break;
-                case "12":
-                    answer = GetHNS(msg);
-                    break;
-                case "13":
-                    answer = GetHSDM(msg);
-                    break;
-                case "14":
-                    answer = GetJail(msg);
-                    break;
-                case "15":
-                    answer = GetKnife();
-                    break;
-                case "16":
-                    answer = GetKZ(msg);
-                    break;
-                case "17":
-                    answer = GetManiac();
-                    break;
-                case "18":
-                    answer = GetMinigames(msg);
-                    break;
-                case "19":
-                    answer = GetMulticFGDM();
-                    break;
-                case "20":
-                    answer = GetPistolDM(msg);
-                    break;
-                case "21":
-                    answer = GetPistolRetake();
-                    break;
-                case "22":
-                    answer = GetPropHunt();
-                    break;
-                case "23":
-                    answer = GetPublic(msg);
-                    break;
-                case "24":
-                    answer = GetRetake(msg);
-                    break;
-                case "25":
-                    answer = GetRetakeClassic(msg);
-                    break;
-                case "26":
-                    answer = GetShokeLobby();
-                    break;
-                case "27":
-                    answer = GetSurf(msg);
-                    break;
-                case "28":
-                    answer = GetSurfCombat();
-                    break;
-                case "29":
-                    answer = GetZombieEscape();
-                    break;
-                default:
-                    break;
-            }
-            _ = message.Channel.SendMessageAsync(answer);
+
+            var builder = new ComponentBuilder()
+                .WithSelectMenu(selectMenuBuilder);
+
+            await message.Channel.SendMessageAsync(text: "Доступно:", components: builder.Build());
         }
 
         #region CS:GO
         private string GetAimDM(string[] msg)
         {
             CSServers cybershoke = new CSServers();
-            //CounterStrikeServers servers = new CounterStrikeServers();
             if (msg.Length < 3)
             {
                 return "1 - Aim DM\n2 - Pistol Aim DM";

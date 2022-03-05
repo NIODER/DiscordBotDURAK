@@ -555,12 +555,11 @@ namespace DiscordBotDURAK
                     break;
             }
             await component.DeferAsync();
-            await DeleteMessageAsync(component.Message, true, 60000); ;
+            DeleteMessageAsync(component.Message, true, 60000); ;
         }
 
         private async Task CommandsHandler(SocketMessage message)
         {
-            Console.WriteLine($"{message.Channel.Id}");
             CheckGuilds(client.Guilds);
             if (!message.Channel.isDirect() && message.Channel.ChannelType() == ChannelSeverity.NoSuchChannel)
             {

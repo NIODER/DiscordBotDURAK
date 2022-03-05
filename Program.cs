@@ -204,11 +204,360 @@ namespace DiscordBotDURAK
                             break;
                     }
                     ComponentBuilder componentBuilder = new ComponentBuilder().WithSelectMenu(selectMenuBuilder);
-                    await component.Channel.SendMessageAsync("", components: componentBuilder.Build());
+                    await component.Channel.SendMessageAsync("Режимы:", components: componentBuilder.Build());
+                    break;
+
+                case "DUELS2X2":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "only-mirage":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDUELS2X2().ONLY_MIRAGE.GetRandom().Info());
+                            break;
+                        case "only-dust":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDUELS2X2().ONLY_DUST2.GetRandom().Info());
+                            break;
+                        case "all-maps":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDUELS2X2().ALL_MAPS.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "DUELS":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "only-mirage":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDUELS().ONLY_MIRAGE.GetRandom().Info());
+                            break;
+                        case "only-dust":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDUELS().ONLY_DUST2.GetRandom().Info());
+                            break;
+                        case "all-maps":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDUELS().ALL_MAPS.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "RETAKE":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "easy":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetRETAKE().EASY.GetRandom().Info());
+                            break;
+                        case "hard":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetRETAKE().HARD.GetRandom().Info());
+                            break;
+                        case "9slots":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetRETAKE().SLOTS9.GetRandom().Info());
+                            break;
+                        case "7slots":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetRETAKE().SLOTS7.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "RETAKECLASSIC":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "easy":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetRETAKECLASSIC().EASY.GetRandom().Info());
+                            break;
+                        case "middle":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetRETAKECLASSIC().MEDIUM.GetRandom().Info());
+                            break;
+                        case "hard":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetRETAKECLASSIC().HARD.GetRandom().Info());
+                            break;
+                        case "9slots":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetRETAKECLASSIC().SLOTS9.GetRandom().Info());
+                            break;
+                        case "7slots":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetRETAKECLASSIC().SLOTS7.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "DM":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "18easy":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDM().EASY18.GetRandom().Info());
+                            break;
+                        case "16easy":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDM().EASY16.GetRandom().Info());
+                            break;
+                        case "14easy":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDM().EASY14.GetRandom().Info());
+                            break;
+                        case "20lite":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDM().LITE20.GetRandom().Info());
+                            break;
+                        case "18lite":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDM().LITE18.GetRandom().Info());
+                            break;
+                        case "16lite":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDM().LITE16.GetRandom().Info());
+                            break;
+                        case "18slots":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDM().SLOTS18.GetRandom().Info());
+                            break;
+                        case "16slots":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDM().SLOTS16.GetRandom().Info());
+                            break;
+                        case "noawp":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetDM().NOAWP.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "HSDM":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "lite":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetHSDM().HSDM_LITE.GetRandom().Info());
+                            break;
+                        case "classic":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetHSDM().HSDM.GetRandom().Info());
+                            break;
+                        case "onetap":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetHSDM().HSDM_ONETAP.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "PISTOLDM":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "hsdm":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetPISTOLDM().PISTOL_HSDM.GetRandom().Info());
+                            break;
+                        case "lite":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetPISTOLDM().PISTOLDM_LITE.GetRandom().Info());
+                            break;
+                        case "classic":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetPISTOLDM().PISTOLDM.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "AWPDM":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "lite":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetAWPDM().AWPDM_LITE.GetRandom().Info());
+                            break;
+                        case "classic":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetAWPDM().AWPDM.GetRandom().Info());
+                            break;
+                        case "noscope":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetAWPDM().NOSCOPEDM.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "AIMDM":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "classic":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetAIM_DM().AIMDM.GetRandom().Info());
+                            break;
+                        case "pistol":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetAIM_DM().PISTOL_AIMDM.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "SURF":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "beginner":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetSURF().BEGINNER.GetRandom().Info());
+                            break;
+                        case "easy":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetSURF().EASY.GetRandom().Info());
+                            break;
+                        case "normal":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetSURF().NORMAL.GetRandom().Info());
+                            break;
+                        case "medium":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetSURF().MEDIUM.GetRandom().Info());
+                            break;
+                        case "hard":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetSURF().HARD.GetRandom().Info());
+                            break;
+                        case "top":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetSURF().TOP.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "BHOP":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "easy":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetBHOP().EASY.GetRandom().Info());
+                            break;
+                        case "medium":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetBHOP().MEDIUM.GetRandom().Info());
+                            break;
+                        case "hard":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetBHOP().HARD.GetRandom().Info());
+                            break;
+                        case "legendary":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetBHOP().LEGEMDARY.GetRandom().Info());
+                            break;
+                        case "tick":
+                            await component.Channel.SendMessageAsync(
+                                new CSServers().GetBHOP().TICK.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "KZ":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "timer-easy":
+                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().TIMER_EASY.GetRandom().Info());
+                            break;
+                        case "go-easy":
+                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().GO_EASY.GetRandom().Info());
+                            break;
+                        case "timer-middle":
+                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().TIMER_MEDIUM.GetRandom().Info());
+                            break;
+                        case "go-middle":
+                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().GO_MEDIUM.GetRandom().Info());
+                            break;
+                        case "timer-hard":
+                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().TIMER_HARD.GetRandom().Info());
+                            break;
+                        case "go-hard":
+                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().GO_HARD.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "PUBLIC":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "only-dust":
+                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().ONLY_DUST2.GetRandom().Info());
+                            break;
+                        case "only-mirage":
+                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().ONLY_MIRAGE.GetRandom().Info());
+                            break;
+                        case "no-limit":
+                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().NO_LIMIT.GetRandom().Info());
+                            break;
+                        case "competitive":
+                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().COMPETITIVE_MAPS.GetRandom().Info());
+                            break;
+                        case "wh":
+                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().WH_ON.GetRandom().Info());
+                            break;
+                        case "all-maps":
+                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().ALL_MAPS.GetRandom().Info());
+                            break;
+                        case "destr-inferno":
+                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().DESTRUCTIBLE_INFERNO.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "AWP":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "cannons":
+                            await component.Channel.SendMessageAsync(new CSServers().GetAWP().AWP_CANNONS.GetRandom().Info());
+                            break;
+                        case "lego":
+                            await component.Channel.SendMessageAsync(new CSServers().GetAWP().ONLY_AWP_LEGO_2.GetRandom().Info());
+                            break;
+                        case "servers":
+                            await component.Channel.SendMessageAsync(new CSServers().GetAWP().AWP_SERVERS.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "HNS":
+                    switch (component.Data.Values.ElementAt(0))
+                    {
+                        case "servers":
+                            await component.Channel.SendMessageAsync(new CSServers().GetHNS().HNS_SERVERS.GetRandom().Info());
+                            break;
+                        case "no-rules":
+                            await component.Channel.SendMessageAsync(new CSServers().GetHNS().HNS_NO_RULES.GetRandom().Info());
+                            break;
+                        case "training":
+                            await component.Channel.SendMessageAsync(new CSServers().GetHNS().HNS_TRAINING.GetRandom().Info());
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 default:
                     break;
             }
+            await component.DeferAsync();
+            await DeleteMessageAsync(component.Message, true, 60000); ;
         }
 
         private async Task CommandsHandler(SocketMessage message)

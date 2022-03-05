@@ -7,10 +7,8 @@ using System.Collections.Generic;
 using EthernetFunctons.Balaboba;
 using Constants;
 using DiscordBotDURAK.EthernetFunctions;
-using System.Threading;
 using CyberShoke;
 using CyberShoke.Objects;
-using Discord.Commands;
 using System.Linq;
 
 namespace DiscordBotDURAK
@@ -562,6 +560,7 @@ namespace DiscordBotDURAK
 
         private async Task CommandsHandler(SocketMessage message)
         {
+            Console.WriteLine($"{message.Channel.Id}");
             CheckGuilds(client.Guilds);
             if (!message.Channel.isDirect() && message.Channel.ChannelType() == ChannelSeverity.NoSuchChannel)
             {
@@ -570,7 +569,7 @@ namespace DiscordBotDURAK
                     "показать сводку типов, а также узнать, как изменить тип " +
                     "напишите $help");
             }
-            if (CheckChannel(message))
+            if (!CheckChannel(message))
             {
                 return;
             }
@@ -724,10 +723,12 @@ namespace DiscordBotDURAK
         {
             if (message.Channel.GetType().ToString() == "Discord.WebSocket.SocketDMChannel")
             {
+                Console.WriteLine($"channel {message.Channel.Id} is dmc");
                 return true;
             }
             if (!((SocketGuildChannel)message.Channel).Guild.Check())
             {
+                Console.WriteLine($"add channel {message.Channel.Id}");
                 AddGuildInDB(message);
             }
             return message.Channel.ChannelType() != ChannelSeverity.None;

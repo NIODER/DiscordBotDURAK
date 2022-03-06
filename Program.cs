@@ -203,10 +203,6 @@ namespace DiscordBotDURAK
                 {
                     SPAM_Func(message);
                 }
-                if (message.Content.ToLower().StartsWith(Commands.delete))
-                {
-                    DeleteFunc(message);
-                }
                 if (message.Content.ToLower().StartsWith(Commands.moderate))
                 {
                     Moderate(message);

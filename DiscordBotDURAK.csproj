@@ -3,10 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>1.1.3</Version>
+    <Version>1.1.4</Version>
     <PackageLicenseExpression>KLGR125 AlexanderK nioder125@gmail.com</PackageLicenseExpression>
     <Authors>AlexanderK</Authors>
     <Company>KLGR125</Company>
+    <PackageIcon>khuy_kakoy-to.png</PackageIcon>
+    <PackageIconUrl />
+    <ApplicationIcon>khuy_kakoy-to.ico</ApplicationIcon>
+    <StartupObject>DiscordBotDURAK.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +20,13 @@
     <PackageReference Include="HtmlAgilityPack" Version="1.11.42" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\Изображения\khuy_kakoy-to.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

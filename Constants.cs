@@ -32,7 +32,6 @@ namespace Constants
         public static readonly string owner = "$owner";
         public static readonly string setChannelType = "$set";
         public static readonly string setRadio = $"$addrad";
-        public static readonly string delete = "$delete";
         public static readonly string random = "$random"; 
         public static readonly string spam = "$spam"; 
         public static readonly string moderate = "$moderate"; 

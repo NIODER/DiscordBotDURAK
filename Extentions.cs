@@ -19,19 +19,18 @@ namespace DiscordBotDURAK
         public static bool IsAuthorAdmin(this SocketMessage message) => message.Author.isAdmin(((SocketGuildChannel)message.Channel).Guild.Id);
         public static Server GetRandom(this IEnumerable<Server> list) => list.ElementAt(new Random().Next(list.Count() - 1));
         public static string Info(this Server server) => $"{server.category} {server.country} {server.players}/{server.maxplayers}\nconnect {server.ip}:{server.port}";
-        public static Task DeleteMessageAsync(this RestUserMessage message, bool enableTimer, int timer = 30000)
+        public static async Task DeleteMessageAsync(this RestUserMessage message, bool enableTimer, int timer = 30000)
         {
             if (enableTimer)
             {
-                Task.Delay(timer);
-                message.Channel.DeleteMessageAsync(message.Id);
+                await Task.Delay(timer);
+                await message.Channel.DeleteMessageAsync(message.Id);
             }
             else
             {
-                message.Channel.DeleteMessageAsync(message.Id);
+                await message.Channel.DeleteMessageAsync(message.Id);
             }
-            Program.Log(new(LogSeverity.Info, Sources.internal_function, "Message deleted"));
-            return Task.CompletedTask;
+            await Program.Log(new(LogSeverity.Info, Sources.internal_function, "Message deleted"));
         }
     }
 }

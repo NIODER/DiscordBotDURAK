@@ -51,511 +51,63 @@ namespace DiscordBotDURAK
             switch (component.Data.CustomId)
             {
                 case "cs-main":
-                    SelectMenuBuilder selectMenuBuilder = new SelectMenuBuilder()
-                        .WithMinValues(1)
-                        .WithMaxValues(1);
-                    switch ((CybershokeCategories)Enum.Parse(typeof(CybershokeCategories), component.Data.Values.ElementAt(0)))
+                    var csMain = CybershokeCSGOCommandButtons.CsMain(component);
+                    if (csMain.text is null)
                     {
-                        case CybershokeCategories.DUELS2X2:
-                            selectMenuBuilder
-                                .WithCustomId("DUELS2X2")
-                                .AddOption("ONLY MIRAGE", "only-mirage")
-                                .AddOption("ONLY DUST2", "only-dust")
-                                .AddOption("ALL MAPS", "all-maps");
-                            break;
-                        case CybershokeCategories.DUELS:
-                            selectMenuBuilder
-                                .WithCustomId("DUELS")
-                                .AddOption("ONLY MIRAGE", "only-mirage")
-                                .AddOption("ONLY DUST2", "only-dust")
-                                .AddOption("ALL MAPS", "all-maps");
-                            break;
-                        case CybershokeCategories.RETAKE:
-                            selectMenuBuilder
-                                .WithCustomId("RETAKE")
-                                .AddOption("1-3 LVL FACEIT", "easy")
-                                .AddOption("8-10 LVL FACEIT", "hard")
-                                .AddOption("9 SLOTS", "9slots")
-                                .AddOption("7 SLOTS", "7slots");
-                            break;
-                        case CybershokeCategories.RETAKECLASSIC:
-                            selectMenuBuilder
-                                .WithCustomId("RETAKECLASSIC")
-                                .AddOption("1-3 LVL FACEIT", "easy")
-                                .AddOption("4-7 LVL FACEIT", "middle")
-                                .AddOption("8-10 LVL FACEIT", "hard")
-                                .AddOption("OPEN TO ALL - 9 SLOTS", "9slots")
-                                .AddOption("OPEN TO ALL - 7 SLOTS", "7slots");
-                            break;
-                        case CybershokeCategories.DM:
-                            selectMenuBuilder.WithCustomId("DM")
-                                .AddOption("18 SLOTS LITE 1-3LVL FACEIT", "18easy")
-                                .AddOption("16 SLOTS LITE 1-3LVL FACEIT", "16easy")
-                                .AddOption("14 SLOTS LITE 1-3LVL FACEIT", "14easy")
-                                .AddOption("20 SLOTS LITE", "20lite")
-                                .AddOption("18 SLOTS LITE", "18lite")
-                                .AddOption("16 SLOTS LITE", "16lite")
-                                .AddOption("18 SLOTS", "18slots")
-                                .AddOption("16 SLOTS", "16slots")
-                                .AddOption("NOAWP", "noawp");
-                            break;
-                        case CybershokeCategories.HSDM:
-                            selectMenuBuilder.WithCustomId("HSDM")
-                                .AddOption("HSDM LITE", "lite")
-                                .AddOption("HSDM", "classic")
-                                .AddOption("HSDM ONETAP", "onetap");
-                            break;
-                        case CybershokeCategories.PISTOLDM:
-                            selectMenuBuilder.WithCustomId("PISTOLDM")
-                                .AddOption("PISTOL HSDM", "hsdm")
-                                .AddOption("PISTOLDM LITE", "lite")
-                                .AddOption("PISTOLDM", "classic");
-                            break;
-                        case CybershokeCategories.MULTICFGDM:
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetMULTICFGDM().GetRandom().Info());
-                            return;
-                        case CybershokeCategories.AWPDM:
-                            selectMenuBuilder.WithCustomId("AWPDM")
-                                .AddOption("AWPDM LITE", "lite")
-                                .AddOption("AWPDM", "classic")
-                                .AddOption("NOSCOPEDM", "noscope");
-                            break;
-                        case CybershokeCategories.AIMDM:
-                            selectMenuBuilder.WithCustomId("AIMDM")
-                                .AddOption("AIMDM", "classic")
-                                .AddOption("PISTOL AIMDM", "pistol");
-                            break;
-                        case CybershokeCategories.EXECUTE:
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetEXECUTE().GetRandom().Info());
-                            return;
-                        case CybershokeCategories.PISTOLRETAKE:
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetPISTOLRETAKE().GetRandom().Info());
-                            return;
-                        case CybershokeCategories.SURF:
-                            selectMenuBuilder.WithCustomId("SURF")
-                                .AddOption("TIER 1 - BEGINNER", "beginner")
-                                .AddOption("TIER 1-2 - EASY", "easy")
-                                .AddOption("TIER 1-3 - NORMAL", "normal")
-                                .AddOption("TIER 3-4 - MEDIUM", "medium")
-                                .AddOption("TIER 3-5 - HARD", "hard")
-                                .AddOption("TIER 4-8 - TOP 350", "top");
-                            break;
-                        case CybershokeCategories.BHOP:
-                            selectMenuBuilder.WithCustomId("BHOP")
-                                .AddOption("TIER 1-2 - EASY", "easy")
-                                .AddOption("TIER 3-4 - MEDIUM", "medium")
-                                .AddOption("TIER 5-6 - HARD", "hard")
-                                .AddOption("LEGENDARY MAPS", "legendary")
-                                .AddOption("64 TICK", "tick");
-                            break;
-                        case CybershokeCategories.KZ:
-                            selectMenuBuilder.WithCustomId("KZ")
-                                .AddOption("KZTimer - TIER 1-2", "timer-easy")
-                                .AddOption("GOKZ - TIER 1-2", "go-easy")
-                                .AddOption("KZTimer - TIER 3-4", "timer-middle")
-                                .AddOption("GOKZ - TIER 3-4", "go-middle")
-                                .AddOption("KZTimer - TIER 5-6", "timer-hard")
-                                .AddOption("GOKZ - TIER 5-6", "go-hard");
-                            break;
-                        case CybershokeCategories.ARENA:
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetARENA().GetRandom().Info());
-                            return;
-                        case CybershokeCategories.PUBLIC:
-                            selectMenuBuilder.WithCustomId("PUBLIC")
-                                .AddOption("ONLY DUST2", "only-dust")
-                                .AddOption("ONLY MIRAGE", "only-mirage")
-                                .AddOption("NO LIMIT", "no-limit")
-                                .AddOption("COMPETITIVE MAPS", "competitive")
-                                .AddOption("WH ON", "wh")
-                                .AddOption("ALL MAPS", "all-maps")
-                                .AddOption("DESTRUCTIBLE INFERNO", "destr-inferno");
-                            break;
-                        case CybershokeCategories.AWP:
-                            selectMenuBuilder.WithCustomId("AWP")
-                                .AddOption("AWP CANNONS", "cannons")
-                                .AddOption("ONLY AWP LEGO 2", "lego")
-                                .AddOption("AWP SERVERS", "servers");
-                            break;
-                        case CybershokeCategories.MANIAC:
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetMANIAC().GetRandom().Info());
-                            return;
-                        case CybershokeCategories.PROPHUNT:
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetPROPHUNT().GetRandom().Info());
-                            return;
-                        case CybershokeCategories.HNS:
-                            selectMenuBuilder.WithCustomId("HNS")
-                                .AddOption("HNS SERVERS", "servers")
-                                .AddOption("HNS NO RULES", "no-rules")
-                                .AddOption("HNS TRAINING", "training");
-                            break;
-                        case CybershokeCategories.KNIFE:
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetKNIFE().GetRandom().Info());
-                            return;
-                        default:
-                            break;
+                        csMain.text = "Режимы:";
                     }
-                    ComponentBuilder componentBuilder = new ComponentBuilder().WithSelectMenu(selectMenuBuilder);
-                    await component.Channel.SendMessageAsync("Режимы:", components: componentBuilder.Build());
+                    component.Channel.SendMessageAsync(csMain.text, components: csMain.builder.Build()).Result.DeleteMessageAsync(true, 60000);
                     break;
-
                 case "DUELS2X2":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "only-mirage":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDUELS2X2().ONLY_MIRAGE.GetRandom().Info());
-                            break;
-                        case "only-dust":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDUELS2X2().ONLY_DUST2.GetRandom().Info());
-                            break;
-                        case "all-maps":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDUELS2X2().ALL_MAPS.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.Duplets(component));
                     break;
                 case "DUELS":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "only-mirage":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDUELS().ONLY_MIRAGE.GetRandom().Info());
-                            break;
-                        case "only-dust":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDUELS().ONLY_DUST2.GetRandom().Info());
-                            break;
-                        case "all-maps":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDUELS().ALL_MAPS.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.Duels(component));
                     break;
                 case "RETAKE":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "easy":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetRETAKE().EASY.GetRandom().Info());
-                            break;
-                        case "hard":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetRETAKE().HARD.GetRandom().Info());
-                            break;
-                        case "9slots":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetRETAKE().SLOTS9.GetRandom().Info());
-                            break;
-                        case "7slots":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetRETAKE().SLOTS7.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.Retake(component));
                     break;
                 case "RETAKECLASSIC":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "easy":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetRETAKECLASSIC().EASY.GetRandom().Info());
-                            break;
-                        case "middle":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetRETAKECLASSIC().MEDIUM.GetRandom().Info());
-                            break;
-                        case "hard":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetRETAKECLASSIC().HARD.GetRandom().Info());
-                            break;
-                        case "9slots":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetRETAKECLASSIC().SLOTS9.GetRandom().Info());
-                            break;
-                        case "7slots":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetRETAKECLASSIC().SLOTS7.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.RetakeClasiic(component));
                     break;
                 case "DM":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "18easy":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDM().EASY18.GetRandom().Info());
-                            break;
-                        case "16easy":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDM().EASY16.GetRandom().Info());
-                            break;
-                        case "14easy":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDM().EASY14.GetRandom().Info());
-                            break;
-                        case "20lite":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDM().LITE20.GetRandom().Info());
-                            break;
-                        case "18lite":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDM().LITE18.GetRandom().Info());
-                            break;
-                        case "16lite":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDM().LITE16.GetRandom().Info());
-                            break;
-                        case "18slots":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDM().SLOTS18.GetRandom().Info());
-                            break;
-                        case "16slots":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDM().SLOTS16.GetRandom().Info());
-                            break;
-                        case "noawp":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetDM().NOAWP.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.DM(component));
                     break;
                 case "HSDM":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "lite":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetHSDM().HSDM_LITE.GetRandom().Info());
-                            break;
-                        case "classic":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetHSDM().HSDM.GetRandom().Info());
-                            break;
-                        case "onetap":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetHSDM().HSDM_ONETAP.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.HSDM(component));
                     break;
                 case "PISTOLDM":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "hsdm":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetPISTOLDM().PISTOL_HSDM.GetRandom().Info());
-                            break;
-                        case "lite":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetPISTOLDM().PISTOLDM_LITE.GetRandom().Info());
-                            break;
-                        case "classic":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetPISTOLDM().PISTOLDM.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.PISTOLDM(component));
                     break;
                 case "AWPDM":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "lite":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetAWPDM().AWPDM_LITE.GetRandom().Info());
-                            break;
-                        case "classic":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetAWPDM().AWPDM.GetRandom().Info());
-                            break;
-                        case "noscope":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetAWPDM().NOSCOPEDM.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.AWPDM(component));
                     break;
                 case "AIMDM":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "classic":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetAIM_DM().AIMDM.GetRandom().Info());
-                            break;
-                        case "pistol":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetAIM_DM().PISTOL_AIMDM.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.AIMDM(component));
                     break;
                 case "SURF":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "beginner":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetSURF().BEGINNER.GetRandom().Info());
-                            break;
-                        case "easy":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetSURF().EASY.GetRandom().Info());
-                            break;
-                        case "normal":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetSURF().NORMAL.GetRandom().Info());
-                            break;
-                        case "medium":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetSURF().MEDIUM.GetRandom().Info());
-                            break;
-                        case "hard":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetSURF().HARD.GetRandom().Info());
-                            break;
-                        case "top":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetSURF().TOP.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.SURF(component));
                     break;
                 case "BHOP":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "easy":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetBHOP().EASY.GetRandom().Info());
-                            break;
-                        case "medium":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetBHOP().MEDIUM.GetRandom().Info());
-                            break;
-                        case "hard":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetBHOP().HARD.GetRandom().Info());
-                            break;
-                        case "legendary":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetBHOP().LEGEMDARY.GetRandom().Info());
-                            break;
-                        case "tick":
-                            await component.Channel.SendMessageAsync(
-                                new CSServers().GetBHOP().TICK.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.BHOP(component));
                     break;
                 case "KZ":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "timer-easy":
-                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().TIMER_EASY.GetRandom().Info());
-                            break;
-                        case "go-easy":
-                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().GO_EASY.GetRandom().Info());
-                            break;
-                        case "timer-middle":
-                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().TIMER_MEDIUM.GetRandom().Info());
-                            break;
-                        case "go-middle":
-                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().GO_MEDIUM.GetRandom().Info());
-                            break;
-                        case "timer-hard":
-                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().TIMER_HARD.GetRandom().Info());
-                            break;
-                        case "go-hard":
-                            await component.Channel.SendMessageAsync(new CSServers().GetKZ().GO_HARD.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.KZ(component));
                     break;
                 case "PUBLIC":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "only-dust":
-                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().ONLY_DUST2.GetRandom().Info());
-                            break;
-                        case "only-mirage":
-                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().ONLY_MIRAGE.GetRandom().Info());
-                            break;
-                        case "no-limit":
-                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().NO_LIMIT.GetRandom().Info());
-                            break;
-                        case "competitive":
-                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().COMPETITIVE_MAPS.GetRandom().Info());
-                            break;
-                        case "wh":
-                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().WH_ON.GetRandom().Info());
-                            break;
-                        case "all-maps":
-                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().ALL_MAPS.GetRandom().Info());
-                            break;
-                        case "destr-inferno":
-                            await component.Channel.SendMessageAsync(new CSServers().GetPUBLIC().DESTRUCTIBLE_INFERNO.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.PUBLIC(component));
                     break;
                 case "AWP":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "cannons":
-                            await component.Channel.SendMessageAsync(new CSServers().GetAWP().AWP_CANNONS.GetRandom().Info());
-                            break;
-                        case "lego":
-                            await component.Channel.SendMessageAsync(new CSServers().GetAWP().ONLY_AWP_LEGO_2.GetRandom().Info());
-                            break;
-                        case "servers":
-                            await component.Channel.SendMessageAsync(new CSServers().GetAWP().AWP_SERVERS.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.AWP(component));
                     break;
                 case "HNS":
-                    switch (component.Data.Values.ElementAt(0))
-                    {
-                        case "servers":
-                            await component.Channel.SendMessageAsync(new CSServers().GetHNS().HNS_SERVERS.GetRandom().Info());
-                            break;
-                        case "no-rules":
-                            await component.Channel.SendMessageAsync(new CSServers().GetHNS().HNS_NO_RULES.GetRandom().Info());
-                            break;
-                        case "training":
-                            await component.Channel.SendMessageAsync(new CSServers().GetHNS().HNS_TRAINING.GetRandom().Info());
-                            break;
-                        default:
-                            break;
-                    }
+                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.HNS(component));
                     break;
                 default:
                     break;
             }
             await component.DeferAsync();
-            DeleteMessageAsync(component.Message, true, 60000); ;
+            DeleteMessageAsync(component.Message, true, 60000);
         }
 
         private async Task CommandsHandler(SocketMessage message)

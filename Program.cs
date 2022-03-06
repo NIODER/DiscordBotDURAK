@@ -1131,19 +1131,6 @@ namespace DiscordBotDURAK
                 $"{message.Author.Username}, {Balaboba.Say(message.Content)}");
         }
 
-        private async void DeleteFunc(SocketMessage message)
-        {
-            int counter = Convert.ToInt32(message.Content.Substring(Commands.delete.Length).Trim().TrimEnd());
-            var messages = message.Channel.GetMessagesAsync(counter);
-            await foreach (var msg in messages)
-            {
-                foreach (var message1 in msg)
-                {
-                    await message1.DeleteAsync();
-                }
-            }
-        }
-
         private async void RefModeration(IMessage message)
         {
             ISocketMessageChannel channel = ((ISocketMessageChannel)message.Channel);

@@ -298,5 +298,10 @@ namespace DiscordBotDURAK
             "training" => new CSServers().GetHNS().HNS_TRAINING.GetRandom().Info(),
             _ => throw new IndexOutOfRangeException()
         };
+
+        public static string MULTICFGDM(SocketMessageComponent component) => component.Data.Values.ElementAt(0) switch
+        {
+
+        };
     }
 }

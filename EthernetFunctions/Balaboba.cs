@@ -103,7 +103,16 @@ namespace EthernetFunctons.Balaboba
                 dataStream.Write(byteArray, 0, byteArray.Length);
             }
 
-            WebResponse webResponse = webRequest.GetResponse();
+            WebResponse webResponse;
+            try
+            {
+                webResponse = webRequest.GetResponse();
+            }
+            catch (WebException e)
+            {
+                DiscordBotDURAK.Program.Log(new Discord.LogMessage(Discord.LogSeverity.Error, "Balaboba", "Balaboba is not working", e));
+                return "Балабоба не работает";
+            }
 
             using (Stream stream = webResponse.GetResponseStream())
             {

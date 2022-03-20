@@ -605,34 +605,35 @@ namespace DiscordBotDURAK
             {
                 return;
             }
-            if (message.Content.Contains("http"))
+            if (message.Content.Contains("gfycat") && message.Content.Contains("gif"))
             {
-                if (message.Content.Contains("gfycat") && message.Content.Contains("gif"))
-                {
-                    await message.Channel.SendMessageAsync($"||{message.Content}||");
-                    await message.DeleteAsync();
-                    return;
-                }
-                ulong refsChannelId = MyDatabase.GetReferencesChannel(Convert.ToString(((SocketGuildChannel)channel).Guild.Id));
-                if (refsChannelId == 0)
-                {
-                    return;
-                }
-                ulong autorId = message.Author.Id;
-                string content = message.Content;
-                await message.DeleteAsync();    
-                ISocketMessageChannel referencesChannel = 
-                    client.GetChannel(refsChannelId) as ISocketMessageChannel;
-                if (message.Content.ToLower().Contains("разд") || message.Content.ToLower().Contains("нитро") || message.Content.ToLower().Contains("nitro"))
-                {
-                    await referencesChannel.SendMessageAsync($"Вероятно, это очередной скам \n ||{content}||");
-
-                    Console.WriteLine($"Переслано скам сообщение от {message.Author.Username}.");
-                    return;
-                }
-                await referencesChannel.SendMessageAsync($"<@{autorId}>: \n\"{content}\""); //(!)
-                await Log(new(LogSeverity.Info, Sources.command, $"Message from {message.Author.Username} has been redirected"));
+                await message.Channel.SendMessageAsync($"||{message.Content}||");
+                await message.DeleteAsync();
+                return;
             }
+            ulong refsChannelId = MyDatabase.GetReferencesChannel(Convert.ToString(((SocketGuildChannel)channel).Guild.Id));
+            if (refsChannelId == 0)
+            {
+                return;
+            }
+            ulong autorId = message.Author.Id;
+            string content = message.Content;
+            ISocketMessageChannel referencesChannel =
+                client.GetChannel(refsChannelId) as ISocketMessageChannel;
+            if (message.Content.ToLower().Contains("разд") || message.Content.ToLower().Contains("нитро") || message.Content.ToLower().Contains("nitro"))
+            {
+                await referencesChannel.SendMessageAsync($"Вероятно, это очередной скам \n ||{content}||");
+
+                Console.WriteLine($"Переслано скам сообщение от {message.Author.Username}.");
+                return;
+            }
+            if (message.Content.Contains("tenor.com"))
+            {
+                return;
+            }
+            await referencesChannel.SendMessageAsync($"<@{autorId}>: \n\"{content}\"");
+            await message.DeleteAsync();
+            await Log(new(LogSeverity.Info, Sources.command, $"Message from {message.Author.Username} has been redirected"));
         }
 
         private async void SendId(SocketMessage message)

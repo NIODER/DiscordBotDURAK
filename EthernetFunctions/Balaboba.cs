@@ -111,7 +111,7 @@ namespace EthernetFunctons.Balaboba
             catch (WebException e)
             {
                 DiscordBotDURAK.Program.Log(new Discord.LogMessage(Discord.LogSeverity.Error, "Balaboba", "Balaboba is not working", e));
-                return "Балабоба не работает";
+                return null;
             }
 
             using (Stream stream = webResponse.GetResponseStream())

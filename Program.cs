@@ -588,14 +588,19 @@ namespace DiscordBotDURAK
             await Log(new(LogSeverity.Info, Sources.command, $"{word} spammed {counter} times"));
         }
 
-        private async void SHITPOST_Func(SocketMessage message)
+        private void SHITPOST_Func(SocketMessage message)
         {
-            if (message.Channel.IsReferences())
+            string authorUsername = message.Author.Username;
+            string balabobaAnswer = Balaboba.Say(message.Content);
+
+            if (message.Channel.IsReferences() || balabobaAnswer is null)
             {
                 return;
             }
-            await message.Channel.SendMessageAsync(
-                $"{message.Author.Username}, {Balaboba.Say(message.Content)}");
+            else
+            {
+                _ = message.Channel.SendMessageAsync($"{authorUsername}, {balabobaAnswer}");
+            }
         }
 
         private async void RefModeration(IMessage message)

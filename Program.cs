@@ -119,7 +119,7 @@ namespace DiscordBotDURAK
             {
                 return;
             }
-            if ((message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0) && !message.Channel.IsReferences())
+            if (!isReply((IUserMessage)message) && (message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0) && !message.Channel.IsReferences())
             {
                 await DeleteMessageAsync(message, enableTimer: true);
             }
@@ -214,6 +214,8 @@ namespace DiscordBotDURAK
         }
 
         #region internal
+
+        private bool isReply(IUserMessage message) => message?.ReferencedMessage?.Content is not null;
 
         private void CheckGuilds(IReadOnlyCollection<SocketGuild> guilds)
         {

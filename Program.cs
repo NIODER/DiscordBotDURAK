@@ -68,9 +68,6 @@ namespace DiscordBotDURAK
                 case "DM":
                     await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.DM(component));
                     break;
-                case "HSDM":
-                    await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.HSDM(component));
-                    break;
                 case "PISTOLDM":
                     await component.Channel.SendMessageAsync(CybershokeCSGOCommandButtons.PISTOLDM(component));
                     break;
@@ -107,110 +104,115 @@ namespace DiscordBotDURAK
 
         private async Task CommandsHandler(SocketMessage message)
         {
-            CheckGuilds(client.Guilds);
-            if (!message.Channel.isDirect() && message.Channel.ChannelType() == ChannelSeverity.NoSuchChannel)
+            _ = Task.Run(async () =>
             {
-                MyDatabase.AddChannel(message.GuildId(), message.Channel.Id);
-                await message.Channel.SendMessageAsync("Этот канал помечен типом \"флуд\", чтобы " +
-                    "показать сводку типов, а также узнать, как изменить тип " +
-                    "напишите $help");
-            }
-            if (!CheckChannel(message))
-            {
-                return;
-            }
-            if (!isReply((IUserMessage)message) && (message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0) && !message.Channel.IsReferences())
-            {
-                await DeleteMessageAsync(message, enableTimer: true);
-            }
-            if (message.Author.IsBot)
-            {
-                return;
-            }
+                CheckGuilds(client.Guilds);
+                if (!message.Channel.isDirect() && message.Channel.ChannelType() == ChannelSeverity.NoSuchChannel)
+                {
+                    MyDatabase.AddChannel(message.GuildId(), message.Channel.Id);
+                    await message.Channel.SendMessageAsync("Этот канал помечен типом \"флуд\", чтобы " +
+                        "показать сводку типов, а также узнать, как изменить тип " +
+                        "напишите $help");
+                }
+                if (!CheckChannel(message))
+                {
+                    return;
+                }
+                if (!isReply((IUserMessage)message) && (message.MentionedUsers.Count != 0 || message.MentionedRoles.Count != 0) && !message.Channel.IsReferences())
+                {
+                    await DeleteMessageAsync(message, enableTimer: true);
+                }
+                if (message.Author.IsBot)
+                {
+                    return;
+                }
 
-            if (message.Content.StartsWith(Commands.radio))
-            {
-                GetRadio(message);
-            }
-            if (message.Content.StartsWith(Commands.joke))
-            {
-                GetJoke(message);
-            }
-            if (message.Content.ToLower().StartsWith(Commands.quote))
-            {
-                MortarQuote(message);
-            }
-            if (message.Content.StartsWith(Commands.search))
-            {
-                SearchMessages(message);
-            }
-            if (message.Content.StartsWith(Commands.help))
-            {
-                CommandsHelp(message);
-            }
-            if (message.Content.ToLower().StartsWith(Commands.random))
-            {
-                RAND_Func(message);
-            }
-            if (message.Content.ToLower().Contains(Commands.decide))
-            {
-                Desider(message);
-            }
-            if (message.Content == Commands.id)
-            {
-                SendId(message);
-            }
-            if (RandomMessages.TriggerCheck(message.Content.ToLower()))
-            {
-                SHITPOST_Func(message);
-            }
-            if (message.Content.Contains("http"))
-            {
-                RefModeration(message);
-            }
-            if (message.Content.StartsWith(Commands.cyberShoke))
-            {
-                GetCSGOServer(message);
-            }
-            if (message.IsAuthorAdmin())
-            {
-                if (message.Content.StartsWith(Commands.deleteFavorRadio))
+                if (message.Content.StartsWith(Commands.radio))
                 {
-                    DeleteFavour(message);
+                    GetRadio(message);
                 }
-                if (message.Content.StartsWith(Commands.setRadio))
+                if (message.Content.StartsWith(Commands.joke))
                 {
-                    SetFavour(message);
+                    GetJoke(message);
                 }
-                if (message.Content.StartsWith(Commands.joinedAt))
+                if (message.Content.ToLower().StartsWith(Commands.quote))
                 {
-                    WhenJoined(message);
+                    MortarQuote(message);
                 }
-                if (message.Content.ToLower() == Commands.owner)
+                if (message.Content.StartsWith(Commands.search))
                 {
-                    OwnerHelp(message);
+                    SearchMessages(message);
                 }
-                if (message.Content.StartsWith(Commands.setChannelType))
+                if (message.Content.StartsWith(Commands.help))
                 {
-                    SetChannelType(message);
+                    CommandsHelp(message);
                 }
-                if (message.Content.ToLower().StartsWith(Commands.spam))
+                if (message.Content.ToLower().StartsWith(Commands.random))
                 {
-                    SPAM_Func(message);
+                    RAND_Func(message);
                 }
-                if (message.Content.ToLower().StartsWith(Commands.moderate))
+                if (message.Content.ToLower().Contains(Commands.decide))
                 {
-                    Moderate(message);
+                    Desider(message);
                 }
-                if (message.Content.ToLower().Contains(Commands.clean))
+                if (message.Content == Commands.id)
                 {
-                    Clear(message, Commands.clean);
+                    SendId(message);
                 }
-                if (message.Content.StartsWith(Commands.giveAdmin))
+                if (RandomMessages.TriggerCheck(message.Content.ToLower()))
                 {
-                    GiveAdmin(message);
+                    SHITPOST_Func(message);
+                }
+                if (message.Content.Contains("http"))
+                {
+                    RefModeration(message);
+                }
+                if (message.Content.StartsWith(Commands.cyberShoke))
+                {
+                    GetCSGOServer(message);
+                }
+                if (message.IsAuthorAdmin())
+                {
+                    if (message.Content.StartsWith(Commands.deleteFavorRadio))
+                    {
+                        DeleteFavour(message);
+                    }
+                    if (message.Content.StartsWith(Commands.setRadio))
+                    {
+                        SetFavour(message);
+                    }
+                    if (message.Content.StartsWith(Commands.joinedAt))
+                    {
+                        WhenJoined(message);
+                    }
+                    if (message.Content.ToLower() == Commands.owner)
+                    {
+                        OwnerHelp(message);
+                    }
+                    if (message.Content.StartsWith(Commands.setChannelType))
+                    {
+                        SetChannelType(message);
+                    }
+                    if (message.Content.ToLower().StartsWith(Commands.spam))
+                    {
+                        SPAM_Func(message);
+                    }
+                    if (message.Content.ToLower().StartsWith(Commands.moderate))
+                    {
+                        Moderate(message);
+                    }
+                    if (message.Content.ToLower().Contains(Commands.clean))
+                    {
+                        Clear(message, Commands.clean);
+                    }
+                    if (message.Content.StartsWith(Commands.giveAdmin))
+                    {
+                        GiveAdmin(message);
+                    }
                 }
             }
+            );
+            
         }
 
         #region internal

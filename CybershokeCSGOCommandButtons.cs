@@ -50,36 +50,23 @@ namespace DiscordBotDURAK
                     break;
                 case CybershokeCategories.DM:
                     selectMenuBuilder.WithCustomId("DM")
-                        .AddOption("18 SLOTS LITE 1-3LVL FACEIT", "18easy")
-                        .AddOption("16 SLOTS LITE 1-3LVL FACEIT", "16easy")
-                        .AddOption("14 SLOTS LITE 1-3LVL FACEIT", "14easy")
-                        .AddOption("20 SLOTS LITE", "20lite")
-                        .AddOption("18 SLOTS LITE", "18lite")
-                        .AddOption("16 SLOTS LITE", "16lite")
-                        .AddOption("18 SLOTS", "18slots")
-                        .AddOption("16 SLOTS", "16slots")
-                        .AddOption("NOAWP", "noawp");
+                        .AddOption("Hard", "hard")
+                        .AddOption("Medium", "medium")
+                        .AddOption("Easy", "easy");
                     break;
                 case CybershokeCategories.HSDM:
-                    selectMenuBuilder.WithCustomId("HSDM")
-                        .AddOption("HSDM LITE", "lite")
-                        .AddOption("HSDM", "classic")
-                        .AddOption("HSDM ONETAP", "onetap");
+                    text = cyberShoke.GetHSDM().GetRandom().Info();
                     break;
                 case CybershokeCategories.PISTOLDM:
                     selectMenuBuilder.WithCustomId("PISTOLDM")
                         .AddOption("PISTOL HSDM", "hsdm")
-                        .AddOption("PISTOLDM LITE", "lite")
-                        .AddOption("PISTOLDM", "classic");
+                        .AddOption("PISTOLDM MEDIUM", "medium");
                     break;
                 case CybershokeCategories.MULTICFGDM:
                     text = cyberShoke.GetMULTICFGDM().GetRandom().Info();
                     break;
                 case CybershokeCategories.AWPDM:
-                    selectMenuBuilder.WithCustomId("AWPDM")
-                        .AddOption("AWPDM LITE", "lite")
-                        .AddOption("AWPDM", "classic")
-                        .AddOption("NOSCOPEDM", "noscope");
+                    text = cyberShoke.GetAWPDM().GetRandom().Info();
                     break;
                 case CybershokeCategories.AIMDM:
                     selectMenuBuilder.WithCustomId("AIMDM")
@@ -106,16 +93,12 @@ namespace DiscordBotDURAK
                         .AddOption("TIER 1-2 - EASY", "easy")
                         .AddOption("TIER 3-4 - MEDIUM", "medium")
                         .AddOption("TIER 5-6 - HARD", "hard")
-                        .AddOption("LEGENDARY MAPS", "legendary")
-                        .AddOption("64 TICK", "tick");
+                        .AddOption("LEGENDARY MAPS", "legendary");
                     break;
                 case CybershokeCategories.KZ:
                     selectMenuBuilder.WithCustomId("KZ")
-                        .AddOption("KZTimer - TIER 1-2", "timer-easy")
                         .AddOption("GOKZ - TIER 1-2", "go-easy")
-                        .AddOption("KZTimer - TIER 3-4", "timer-middle")
                         .AddOption("GOKZ - TIER 3-4", "go-middle")
-                        .AddOption("KZTimer - TIER 5-6", "timer-hard")
                         .AddOption("GOKZ - TIER 5-6", "go-hard");
                     break;
                 case CybershokeCategories.ARENA:
@@ -125,11 +108,9 @@ namespace DiscordBotDURAK
                     selectMenuBuilder.WithCustomId("PUBLIC")
                         .AddOption("ONLY DUST2", "only-dust")
                         .AddOption("ONLY MIRAGE", "only-mirage")
-                        .AddOption("NO LIMIT", "no-limit")
-                        .AddOption("COMPETITIVE MAPS", "competitive")
+                        .AddOption("TRENDING", "trending")
                         .AddOption("WH ON", "wh")
-                        .AddOption("ALL MAPS", "all-maps")
-                        .AddOption("DESTRUCTIBLE INFERNO", "destr-inferno");
+                        .AddOption("ALL MAPS", "all-maps");
                     break;
                 case CybershokeCategories.AWP:
                     selectMenuBuilder.WithCustomId("AWP")
@@ -196,39 +177,22 @@ namespace DiscordBotDURAK
 
         public static string DM(SocketMessageComponent component) => component.Data.Values.ElementAt(0) switch
         {
-            "18easy" => new CSServers().GetDM().EASY18.GetRandom().Info(),
-            "16easy" => new CSServers().GetDM().EASY16.GetRandom().Info(),
-            "14easy" => new CSServers().GetDM().EASY14.GetRandom().Info(),
-            "20lite" => new CSServers().GetDM().LITE20.GetRandom().Info(),
-            "18lite" => new CSServers().GetDM().LITE18.GetRandom().Info(),
-            "16lite" => new CSServers().GetDM().LITE16.GetRandom().Info(),
-            "18slots" => new CSServers().GetDM().SLOTS18.GetRandom().Info(),
-            "16slots" => new CSServers().GetDM().SLOTS16.GetRandom().Info(),
-            "noawp" => new CSServers().GetDM().NOAWP.GetRandom().Info(),
-            _ => throw new IndexOutOfRangeException()
-        };
-
-        public static string HSDM(SocketMessageComponent component) => component.Data.Values.ElementAt(0) switch
-        {
-            "lite" => new CSServers().GetHSDM().HSDM_LITE.GetRandom().Info(),
-            "classic" => new CSServers().GetHSDM().HSDM.GetRandom().Info(),
-            "onetap" => new CSServers().GetHSDM().HSDM_ONETAP.GetRandom().Info(),
+            "easy" => new CSServers().GetDM().Easy.GetRandom().Info(),
+            "medium" => new CSServers().GetDM().Medium.GetRandom().Info(),
+            "hard" => new CSServers().GetDM().Hard.GetRandom().Info(),
             _ => throw new IndexOutOfRangeException()
         };
 
         public static string PISTOLDM(SocketMessageComponent component) => component.Data.Values.ElementAt(0) switch
         {
-            "hsdm" => new CSServers().GetPISTOLDM().PISTOL_HSDM.GetRandom().Info(),
-            "lite" => new CSServers().GetPISTOLDM().PISTOLDM_LITE.GetRandom().Info(),
-            "classic" => new CSServers().GetPISTOLDM().PISTOLDM.GetRandom().Info(),
+            "hsdm" => new CSServers().GetPISTOLDM().HSDM.GetRandom().Info(),
+            "medium" => new CSServers().GetPISTOLDM().MEDIUM.GetRandom().Info(),
             _ => throw new IndexOutOfRangeException()
         };
 
         public static string AWPDM(SocketMessageComponent component) => component.Data.Values.ElementAt(0) switch
         {
-            "lite" => new CSServers().GetAWPDM().AWPDM_LITE.GetRandom().Info(),
-            "classic" => new CSServers().GetAWPDM().AWPDM.GetRandom().Info(),
-            "noscope" => new CSServers().GetAWPDM().NOSCOPEDM.GetRandom().Info(),
+            "awpdm" => new CSServers().GetAWPDM().GetRandom().Info(),
             _ => throw new IndexOutOfRangeException()
         };
 
@@ -255,18 +219,14 @@ namespace DiscordBotDURAK
             "easy" => new CSServers().GetBHOP().EASY.GetRandom().Info(),
             "medium" => new CSServers().GetBHOP().MEDIUM.GetRandom().Info(),
             "hard" => new CSServers().GetBHOP().HARD.GetRandom().Info(),
-            "legendary" => new CSServers().GetBHOP().LEGEMDARY.GetRandom().Info(),
-            "tick" => new CSServers().GetBHOP().TICK.GetRandom().Info(),
+            "legendary" => new CSServers().GetBHOP().LEGENDARY.GetRandom().Info(),
             _ => throw new IndexOutOfRangeException()
         };
 
         public static string KZ(SocketMessageComponent component) => component.Data.Values.ElementAt(0) switch
         {
-            "timer-easy" => new CSServers().GetKZ().TIMER_EASY.GetRandom().Info(),
             "go-easy" => new CSServers().GetKZ().GO_EASY.GetRandom().Info(),
-            "timer-middle" => new CSServers().GetKZ().TIMER_MEDIUM.GetRandom().Info(),
             "go-middle" => new CSServers().GetKZ().GO_MEDIUM.GetRandom().Info(),
-            "timer-hard" => new CSServers().GetKZ().TIMER_HARD.GetRandom().Info(),
             "go-hard" => new CSServers().GetKZ().GO_HARD.GetRandom().Info(),
             _ => throw new IndexOutOfRangeException()
         };
@@ -275,11 +235,9 @@ namespace DiscordBotDURAK
         {
             "only-dust" => new CSServers().GetPUBLIC().ONLY_DUST2.GetRandom().Info(),
             "only-mirage" => new CSServers().GetPUBLIC().ONLY_MIRAGE.GetRandom().Info(),
-            "no-limit" => new CSServers().GetPUBLIC().NO_LIMIT.GetRandom().Info(),
-            "competitive" => new CSServers().GetPUBLIC().COMPETITIVE_MAPS.GetRandom().Info(),
+            "trending" => new CSServers().GetPUBLIC().TRENDING.GetRandom().Info(),
             "wh" => new CSServers().GetPUBLIC().WH_ON.GetRandom().Info(),
             "all-maps" => new CSServers().GetPUBLIC().ALL_MAPS.GetRandom().Info(),
-            "destr-inferno" => new CSServers().GetPUBLIC().DESTRUCTIBLE_INFERNO.GetRandom().Info(),
             _ => throw new IndexOutOfRangeException()
         };
 
@@ -301,7 +259,8 @@ namespace DiscordBotDURAK
 
         public static string MULTICFGDM(SocketMessageComponent component) => component.Data.Values.ElementAt(0) switch
         {
-
+            "multicfgm" => new CSServers().GetMULTICFGDM().GetRandom().Info(),
+            _ => throw new IndexOutOfRangeException()
         };
     }
 }

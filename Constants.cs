@@ -27,7 +27,6 @@ namespace Constants
         public static readonly string radio = $"$radio";
         public static readonly string joinedAt = $"$joinedAt";
         public static readonly string joke = $"$joke";
-        public static readonly string surf = $"$surf";
         public static readonly string quote = $"$цитата"; 
         public static readonly string owner = "$owner";
         public static readonly string setChannelType = "$set";

@@ -102,7 +102,7 @@ namespace DiscordBotDURAK
             _ = DeleteMessageAsync(component.Message, true, 60000);
         }
 
-        private async Task CommandsHandler(SocketMessage message)
+        private Task CommandsHandler(SocketMessage message)
         {
             _ = Task.Run(async () =>
             {
@@ -212,7 +212,7 @@ namespace DiscordBotDURAK
                 }
             }
             );
-            
+            return Task.CompletedTask;
         }
 
         #region internal

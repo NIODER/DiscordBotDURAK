@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DiscordBotDurak": {
+      "commandName": "Project",
+      "commandLineArgs": "5"
+    }
+  }
+}

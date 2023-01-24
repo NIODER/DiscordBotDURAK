@@ -25,7 +25,7 @@ namespace DiscordBotDurak.Data
 
         public Database()
         {
-            Context = new DatabaseContext(JObject.Parse(File.ReadAllText(Program.configPath))["dbconstring"]?.ToString()
+            Context = new DatabaseContext(JObject.Parse(File.ReadAllText(Program.resourcesPath + "/config.json"))["dbconstring"]?.ToString()
                 ?? throw new ArgumentNullException("connectionString", "no such attribute"));
             Transaction = null;
             Exception = null;
@@ -490,6 +490,13 @@ namespace DiscordBotDurak.Data
             Context.Channels.AsQueryable().First(c => c.ChannelId == channelId).Moderation = moderation;
             Context.SaveChanges();
             return moderation;
+        }
+
+        public GuildUser GetUserByQuestion(ulong qMessageId, ulong userId)
+        {
+            return Context.GuildUsers
+                .Include(u => u.GuildNavigation)
+                .FirstOrDefault(u => u.UserId == userId && u.QMessageId == qMessageId);
         }
 
         /// <summary>

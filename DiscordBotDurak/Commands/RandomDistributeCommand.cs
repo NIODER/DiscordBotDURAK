@@ -1,10 +1,10 @@
-﻿using Discord;
+﻿    using Discord;
 using System;
 using System.Collections.Generic;
 
 namespace DiscordBotDurak.Commands
 {
-    public class RandomDistributeCommand : ICommand
+    public class RandomDistributeCommand : ICommand      
     {
         private readonly List<IGuildUser> users;
         private readonly long teamsCount;

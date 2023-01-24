@@ -34,9 +34,8 @@ namespace DiscordBotDurak
                 BaseRoleSlashCommand(),
                 GiveimmunitySlashCommand(),
                 SetSpyRegimeSlashCommand(),
-                InfoSlashCommand()
-
-                //CreateHelpSlashCommand
+                InfoSlashCommand(),
+                GetCreateHelpSlashCommand()
             };
         }
 
@@ -147,7 +146,7 @@ namespace DiscordBotDurak
         private SlashCommandBuilder AddListSlashCommand()
         {
             return new SlashCommandBuilder()
-                .WithName("add-list")
+                .WithName("list")
                 .WithDescription("Add list to channel or guild. Creates new empty list if list-id is not specified.")
                 .AddOption(new SlashCommandOptionBuilder()
                     .WithName("scope")
@@ -156,7 +155,7 @@ namespace DiscordBotDurak
                     .AddChoice("guild", 0)
                     .AddChoice("channel", 1)
                     .WithRequired(true))
-                .AddOption("list", ApplicationCommandOptionType.Number, "List id need to add. Leave empty to create new list.", isRequired: false)
+                .AddOption("list-id", ApplicationCommandOptionType.Number, "List id need to add. Leave empty to create new list.", isRequired: false)
                 .AddOption("title", ApplicationCommandOptionType.String, "List title. \"Untitled\" by default.", isRequired: false)
                 .AddOption(new SlashCommandOptionBuilder()
                     .WithName("moderation")
@@ -165,7 +164,8 @@ namespace DiscordBotDurak
                     .AddChoice("Send warnings", (int)ModerationMode.OnlyWarnings)
                     .AddChoice("Resend", (int)ModerationMode.OnlyResend)
                     .AddChoice("Delete", (int)ModerationMode.OnlyDelete)
-                    .WithRequired(false));
+                    .WithRequired(false))
+                .AddOption("resend-channel", ApplicationCommandOptionType.Channel, "Channel you want to resend symbols to. (Requred if moderation is OnlyResend)", isRequired: false);
         }
 
         private SlashCommandBuilder AddSymbolsToListSlashCommand()
@@ -274,13 +274,11 @@ namespace DiscordBotDurak
                 .AddOption(new SlashCommandOptionBuilder()
                     .WithName("guild")
                     .WithDescription("Info about this guild.")
-                    .WithType(ApplicationCommandOptionType.SubCommand)
-                    .WithRequired(true))
+                    .WithType(ApplicationCommandOptionType.SubCommand))
                 .AddOption(new SlashCommandOptionBuilder()
                     .WithName("channel")
                     .WithType(ApplicationCommandOptionType.SubCommand)
                     .WithDescription("Info about channel.")
-                    .WithRequired(true)
                     .AddOption(new SlashCommandOptionBuilder()
                         .WithName("channel-mention")
                         .WithDescription("Select channel")
@@ -290,7 +288,6 @@ namespace DiscordBotDurak
                     .WithName("user")
                     .WithDescription("Info about user.")
                     .WithType(ApplicationCommandOptionType.SubCommand)
-                    .WithRequired(true)
                     .AddOption(new SlashCommandOptionBuilder()
                         .WithName("user-mention")
                         .WithDescription("Select user.")
@@ -301,8 +298,15 @@ namespace DiscordBotDurak
         private SlashCommandBuilder GetCreateHelpSlashCommand()
         {
             return new SlashCommandBuilder().WithName("help")
-                .WithDescription("Sends help message");
+                .WithDescription("Sends help message")
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("type")
+                    .WithDescription("Type of help message")
+                    .WithType(ApplicationCommandOptionType.Integer)
+                    .AddChoice("SpyMode", 0)
+                    .AddChoice("ForbiddenSymbols", 1)
+                    .AddChoice("User", 2)
+                    .WithRequired(true));
         }
-
     }
 }

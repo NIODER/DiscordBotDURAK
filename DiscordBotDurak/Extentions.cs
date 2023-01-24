@@ -72,6 +72,32 @@ namespace DiscordBotDurak
             }
         }
 
+        public static Task SendMessageAsync(this ISocketMessageChannel channel, CommandResult commandResult)
+        {
+            if (commandResult.Exception is null)
+            {
+                return channel.SendMessageAsync(text: commandResult.Text,
+                    isTTS: commandResult.IsTTS,
+                    embed: commandResult.Embed,
+                    options: commandResult.RequestOptions,
+                    allowedMentions: commandResult.AllowedMentions,
+                    components: commandResult.MessageComponent,
+                    embeds: commandResult.Embeds);
+            }
+            else
+            {
+                var embed = new EmbedBuilder()
+                    .WithColor(Color.Red)
+                    .AddField("Error occured", commandResult.Exception.Message);
+                return channel.SendMessageAsync(embed: embed.Build());
+            }
+        }
+
+        public static Task ModifyOriginalResponseAsync(this SocketSlashCommand slashCommand, CommandResult commandResult)
+        {
+            return null;
+        }
+
         public static long Next(this Random random, long min, long max)
         {
             long r = random.Next((Int32)(min >> 32), (Int32)(max >> 32));

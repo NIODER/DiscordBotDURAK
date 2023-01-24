@@ -14,12 +14,13 @@ namespace DiscordBotDurak
     {
         public static async void ProcessGuild(SocketGuild guild)
         {
+            var message = guild.DefaultChannel.SendMessageAsync("Processing your guild...");
             using var database = new Database();
             if (database.GetGuild(guild.Id) is null)
             {
-                //var guildOwnerDMChannel = guild.Owner.CreateDMChannelAsync().Result;
-                //await guildOwnerDMChannel.SendMessageAsync("Очень крутое приветствие");
-                //await guildOwnerDMChannel.SendMessageAsync("Объяснение че делать");
+                Logger.Log(LogSeverity.Debug, "ProcessGuild", $"Guild is not in database");
+                var guildOwnerDMChannel = guild.Owner.CreateDMChannelAsync().Result;
+                await guildOwnerDMChannel.SendMessageAsync(new Constants().GetOwnerMessage());
                 database.BeginTransaction();
                 database.AddGuild(new Guild() { GuildId = guild.Id });
                 if (database.CommitAsync().Result)
@@ -33,6 +34,10 @@ namespace DiscordBotDurak
             var processingUsersTasks = guild.Users.Select(ProcessUser).ToArray();
             Task.WaitAll(processingChannelTasks);
             Task.WaitAll(processingUsersTasks);
+            _ = message.Result.DeleteAsync();
+            var message1 = await guild.DefaultChannel.SendMessageAsync("Ready!");
+            await Task.Delay(30000);
+            _ =message1.DeleteAsync();
         }
 
         public static async Task ProcessChannel(SocketGuildChannel channel)

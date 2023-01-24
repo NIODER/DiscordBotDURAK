@@ -16,6 +16,7 @@ namespace DatabaseModel
         public bool HasImmunity { get; set; }
         public string? Invited { get; set; }
         public string? Introduced { get; set; }
+        public ulong? QMessageId { get; set; }
 
         [JsonIgnore]
         public Guild? GuildNavigation { get; set; }

@@ -74,5 +74,11 @@ namespace DiscordBotDurak
             Exception = exception;
             return this;
         }
+
+        public CommandResult WithException(string message)
+        {
+            Exception = new Exception(message);
+            return this;
+        }
     }
 }

@@ -85,6 +85,8 @@ namespace DatabaseModel.Context
                 user.HasOne(u => u.GuildNavigation)
                     .WithMany(g => g.GuildUsers)
                     .HasForeignKey(u => u.GuildId);
+                user.Property(u => u.QMessageId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Channel>(channel =>

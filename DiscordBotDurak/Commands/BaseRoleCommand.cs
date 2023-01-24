@@ -23,15 +23,18 @@ namespace DiscordBotDurak.Commands
         {
             using var db = new Database();
             var guild = db.GetGuild(_guild.Id);
+            var commandResult = new CommandResult();
             if (_isSetNewRole)
             {
                 db.BeginTransaction();
+                if (_role.Permissions.Administrator)
+                {
+                    return new CommandResult().WithException("Base role can't have administrator permissions");
+                }
                 guild.BaseRole = _role.IsEveryone ? Guild.DEFAULT_BASE_ROLE : _role.Id;
                 if (!db.CommitAsync().Result)
-                {
                     return new CommandResult().WithException(new Exception("Something went wrong."));
-                }
-                return new CommandResult().WithEmbed(new EmbedBuilder()
+                commandResult.WithEmbed(new EmbedBuilder()
                     .WithColor(Color.Blue)
                     .AddField("Successfully:", $"Set new baserole: {_role.Mention}. This role will give every new users.")
                     .WithFooter("base-role command")
@@ -42,12 +45,16 @@ namespace DiscordBotDurak.Commands
                 SocketRole baseRole = guild.BaseRole == Guild.DEFAULT_BASE_ROLE 
                     ? _guild.EveryoneRole 
                     : _guild.GetRole(guild.BaseRole);
-                return new CommandResult().WithEmbed(new EmbedBuilder()
+                commandResult.WithEmbed(new EmbedBuilder()
                     .WithColor(Color.Blue)
                     .AddField("Current base role:", $"{baseRole.Mention}")
                     .WithFooter("base-role command")
                     .WithCurrentTimestamp());
             }
+            foreach (var user in _guild.Users)
+                if (user.IsBot)
+                    return commandResult;
+            return null;
         }
     }
 }

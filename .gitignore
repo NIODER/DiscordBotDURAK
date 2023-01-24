@@ -8,6 +8,8 @@ Documentation/
 bin/
 config.json
 XMLConstants.xml
+Dockerfile
+docker-compose.yml
 
 # User-specific files
 *.rsuser

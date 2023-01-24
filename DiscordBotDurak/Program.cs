@@ -4,10 +4,8 @@ using Discord.WebSocket;
 using DiscordBotDurak.CommandHandlers;
 using DiscordBotDurak.Data;
 using DiscordBotDurak.Enum.BotRoles;
-using DiscordBotDurak.Enum.ModerationModes;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -15,14 +13,14 @@ namespace DiscordBotDurak
 {
     class Program
     {
-        public const string configPath = "../../../resources/config.json";
+        public static string resourcesPath;
         private DiscordSocketClient _client;
-        private List<SocketApplicationCommand> _commands;
 
         static Task Main(string[] args) => new Program().MainAsync(args);
 
         public async Task MainAsync(string[] args)
         {
+            resourcesPath = args[1];
             LogSeverity logSeverity = (LogSeverity)Convert.ToInt32(args[0]);
             var logger = Logger.Instance(logSeverity);
             var config = new DiscordSocketConfig()
@@ -30,12 +28,14 @@ namespace DiscordBotDurak
                 GatewayIntents = GatewayIntents.Guilds |
                                  GatewayIntents.GuildMembers |
                                  GatewayIntents.GuildBans |
+                                 GatewayIntents.GuildPresences |
                                  GatewayIntents.GuildIntegrations |
                                  GatewayIntents.GuildVoiceStates |
-                                 GatewayIntents.GuildPresences |
                                  GatewayIntents.GuildMessages |
                                  GatewayIntents.GuildMessageTyping |
-                                 GatewayIntents.MessageContent
+                                 GatewayIntents.MessageContent |
+                                 GatewayIntents.DirectMessages,
+                HandlerTimeout = 4000
             };
             _client = new DiscordSocketClient(config);
             _client.Log += logger.LogAsync;
@@ -55,11 +55,9 @@ namespace DiscordBotDurak
             _client.SelectMenuExecuted += OnSelectMenuExecuted;
             _client.SlashCommandExecuted += OnSlashCommandExecuted;
             _client.GuildMembersDownloaded += OnMembersDownloaded;
-            _client.UserUpdated += OnUserUpdated;
-            _commands = new List<SocketApplicationCommand>();
             await _client.LoginAsync(
                 TokenType.Bot,
-                JObject.Parse(File.ReadAllText(configPath))["token"]?.ToString());
+                JObject.Parse(File.ReadAllText(resourcesPath + "/config.json"))["token"]?.ToString());
             await _client.StartAsync();
             await _client.SetStatusAsync(UserStatus.DoNotDisturb);
             while (true)
@@ -67,19 +65,14 @@ namespace DiscordBotDurak
                 string command = Console.ReadLine();
                 if (command == "stop")
                 {
-                    return;
+                    break;
                 }
                 if (command == "exit")
                 {
-                    OnExit();
-                    return;
+                    await OnExit();
+                    break;
                 }
             }
-        }
-
-        private async Task OnUserUpdated(SocketUser old, SocketUser user)
-        {
-            Logger.Log(LogSeverity.Debug, "OnUserUpdated", $"user {user.Username} сделал какую-то хуйню");
         }
 
         private async Task OnChannelCreated(SocketChannel channel)
@@ -111,14 +104,26 @@ namespace DiscordBotDurak
             });
         }
 
-        private async Task OnGuildAvailable(SocketGuild guild)
+        private Task OnGuildAvailable(SocketGuild guild)
         {
             Logger.Log(LogSeverity.Info, "OnGuildAvailable", "Guild available intent activated.");
-            await Task.Run(() =>
+            _ = Task.Run(() =>
+            {
+                using var db = new Database();
+                if (db.GetGuild(guild.Id) is null)
+                {
+                    GuildHandler.ProcessGuild(guild);
+                }
+            });
+            _ = Task.Run(async () =>
             {
                 foreach (var command in new SlashCommandCreator().GetAllSlashCommands())
-                    _ = guild.CreateApplicationCommandAsync(command.Build());
+                {
+                    guild.CreateApplicationCommandAsync(command.Build(), new RequestOptions()).Wait();
+                    await Task.Delay(1500);
+                }
             });
+            return Task.CompletedTask;
         }
 
         private async Task OnGuildUnavailable(SocketGuild guild)
@@ -127,39 +132,43 @@ namespace DiscordBotDurak
             await guild.DeleteApplicationCommandsAsync();
         }
 
-        private async Task OnLeftGuild(SocketGuild guild)
+        private Task OnLeftGuild(SocketGuild guild)
         {
             Logger.Log(LogSeverity.Info, "OnLeftGuild", "Left guild intent activated.");
-            await guild.DeleteApplicationCommandsAsync();
-            await Task.Run(() =>
+            _ = guild.DeleteApplicationCommandsAsync();
+            _ = Task.Run(() =>
             {
                 using var db = new Database();
                 var dbGuild = db.GetGuild(guild.Id);
                 db.DeleteGuild(dbGuild);
             });
+            return Task.CompletedTask;
         }
 
-        private async Task OnRoleDeleted(SocketRole role)
+        private Task OnRoleDeleted(SocketRole role)
         {
             Logger.Log(LogSeverity.Info, "OnRoleDeleted", "Role deleted intent activated.");
-            await Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 using var db = new Database();
                 var dbGuild = db.GetGuild(role.Guild.Id);
                 if (dbGuild.BaseRole == role.Id)
+                {
                     _ = role.Guild.Owner.SendMessageAsync($"In guild {role.Guild.Name} role {role.Name} was deleted. " +
                         $"This role has been set as base role, so new base role is @everyone.");
-                db.BeginTransaction();
-                dbGuild.BaseRole = Guild.DEFAULT_BASE_ROLE;
-                db.UpdateGuild(dbGuild);
-                await db.CommitAsync();
+                    db.BeginTransaction();
+                    dbGuild.BaseRole = Guild.DEFAULT_BASE_ROLE;
+                    db.UpdateGuild(dbGuild);
+                    await db.CommitAsync();
+                }
             });
+            return Task.CompletedTask;
         }
 
-        private async Task OnUserBanned(SocketUser user, SocketGuild guild)
+        private Task OnUserBanned(SocketUser user, SocketGuild guild)
         {
             Logger.Log(LogSeverity.Info, "OnUserBanned", "User banned intent activated.");
-            await Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 using var db = new Database();
                 var dbUser = db.GetUser(guild.Id, user.Id);
@@ -180,30 +189,47 @@ namespace DiscordBotDurak
                     await db.CommitAsync();
                 }
             });
+            return Task.CompletedTask;
         }
 
-        private async Task OnUserJoined(SocketGuildUser user)
+        private Task OnUserJoined(SocketGuildUser user)
         {
             Logger.Log(LogSeverity.Info, "OnUserJoined", "User joined intent activated.");
-            await Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 using var db = new Database();
+                db.BeginTransaction();
                 var dbUser = db.GetUser(user.Guild.Id, user.Id);
                 if (dbUser is null)
                 {
+                    var qMessageId = user.SendMessageAsync($"Здравствуйте, я бот-ассистент гильдии {user.Guild.Name}.\n" +
+                    $"Ответьте на два вопроса, они нужны для идентификации вас администраторами этой гильдии.\n" +
+                    $"1. Представтесь.").Result.Id;
                     db.AddUser(new GuildUser()
                     {
                         UserId = user.Id,
-                        GuildId = user.Guild.Id
+                        GuildId = user.Guild.Id,
+                        QMessageId = qMessageId
                     });
+                    db.CommitAsync().Wait();
+                    Logger.Log(LogSeverity.Info, "OnUserJoined", $"Base role setted to user: {user.Id}");
+                }
+                else
+                {
+                    var baseRole = db.GetGuild(user.Guild.Id).BaseRole;
+                    if (baseRole != Guild.DEFAULT_BASE_ROLE)
+                    {
+                        await user.AddRoleAsync(baseRole);
+                    }
                 }
             });
+            return Task.CompletedTask;
         }
 
-        private async Task OnUserUnbanned(SocketUser user, SocketGuild guild)
+        private Task OnUserUnbanned(SocketUser user, SocketGuild guild)
         {
             Logger.Log(LogSeverity.Info, "OnUserUnbanned", "User unbanned intent activated.");
-            await Task.Run(() =>
+            _ = Task.Run(() =>
             {
                 using var db = new Database();
                 db.BeginTransaction();
@@ -211,12 +237,13 @@ namespace DiscordBotDurak
                 dbUser.Role = (short)BotRole.User;
                 db.CommitAsync().Wait();
             });
+            return Task.CompletedTask;
         }
 
-        private async Task OnUserVoiceStateUpdated(SocketUser user, SocketVoiceState socketVoiceState, SocketVoiceState socketVoiceState1)
+        private Task OnUserVoiceStateUpdated(SocketUser user, SocketVoiceState socketVoiceState, SocketVoiceState socketVoiceState1)
         {
             Logger.Log(LogSeverity.Info, "OnUserVoiceStateUpdated", "User voice state updated intent activated.");
-            await Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 using var db = new Database();
                 db.BeginTransaction();
@@ -232,15 +259,16 @@ namespace DiscordBotDurak
                 }
                 dbUser.LastActiveAt = DateTime.UtcNow;
                 db.UpdateUser(dbUser);
-                db.CommitAsync().Wait();
+                await db.CommitAsync();
             });
+            return Task.CompletedTask;
         }
 
-        private void OnExit()
+        private async Task OnExit()
         {
             Logger.Log(LogSeverity.Info, "Program", "All guild commands will be deleted.");
             foreach (var guild in _client.Guilds)
-                _ = guild.DeleteApplicationCommandsAsync();
+                await guild.DeleteApplicationCommandsAsync();
         }
 
         private async Task OnReady()
@@ -248,23 +276,27 @@ namespace DiscordBotDurak
             await _client.SetStatusAsync(UserStatus.Online);
         }
 
-        private async Task OnGuildJoined(SocketGuild guild)
+        private Task OnGuildJoined(SocketGuild guild)
         {
-            Logger.Log(LogSeverity.Debug, "Program", "Guild joined.");
-            await guild.DownloadUsersAsync();
+            Logger.Log(LogSeverity.Info, "Program", $"Guild joined {guild.Id}.");
+            _ = guild.DownloadUsersAsync();
+            Logger.Log(LogSeverity.Debug, "OnGuildJoined", $"Users count {guild.Users.Count}");
+            return Task.CompletedTask;
         }
 
         private Task OnMembersDownloaded(SocketGuild guild)
         {
             Logger.Log(LogSeverity.Debug, "Program", "OnMembersDownloaded intent activated.");
+            Logger.Log(LogSeverity.Debug, "OnMembersDownloaded", $"Members count {guild.Users.Count}");
             GuildHandler.ProcessGuild(guild);
             return Task.CompletedTask;
         }
 
-        private async Task OnSlashCommandExecuted(SocketSlashCommand slashCommand)
+        private Task OnSlashCommandExecuted(SocketSlashCommand slashCommand)
         {
             Logger.Log(LogSeverity.Info, GetType().Name, $"slash command {slashCommand.CommandName} executed");
-            await Task.Run(async () =>
+            _ = slashCommand.RespondAsync("Processing...");
+            _ = Task.Run(() =>
             {
                 if (slashCommand.Channel is not SocketGuildChannel) return;
                 ICommandHandler commandHandler = slashCommand.CommandName switch
@@ -280,7 +312,7 @@ namespace DiscordBotDurak
                     "set-privelege" => new SetPrivelegeSlashCommandHandler(slashCommand),
                     "get-lists" => new GetSymbolsListsSlashCommandHandler(slashCommand),
                     "get-symbols" => new GetSymbolsSlashCommandHandler(slashCommand),
-                    "add-list" => new AddListSlashCommandHandler(slashCommand),
+                    "list" => new AddListSlashCommandHandler(slashCommand),
                     "add-symbol" => new AddSymbolSlashCommandHandler(slashCommand),
                     "remove-list" => new RemoveListSlashCommandHandler(slashCommand),
                     "remove-symbol" => new RemoveSymbolSlashCommandHandler(slashCommand),
@@ -290,36 +322,99 @@ namespace DiscordBotDurak
                     "set-immunity" => new SetImmunitySlashCommandHandler(slashCommand),
                     "spy-mode" => new SetSpyModeSlashCommandHandler(slashCommand),
                     "info" => new InfoSlashCommandHandler(slashCommand),
-                    _ => throw new ArgumentOutOfRangeException()
+                    "help" => new HelpCommandHandler(slashCommand),
+                    _ => throw new ArgumentOutOfRangeException("CommandName")
                 };
                 var command = commandHandler.CreateCommand();
                 var commandResult = command.GetResult();
-                await slashCommand.RespondAsync(commandResult);
+                _ = slashCommand.ModifyOriginalResponseAsync(pr =>
+                {
+                    if (commandResult.Exception is null)
+                    {
+                        pr.Content = new(commandResult.Text);
+                        pr.Embed = new(commandResult.Embed);
+                        pr.Embeds = new(commandResult.Embeds);
+                        pr.Components = new(commandResult.MessageComponent);
+                    }
+                    else
+                    {
+                        pr.Embed = new(new EmbedBuilder()
+                            .WithColor(Color.Red)
+                            .AddField("Error occured", commandResult.Exception.Message).Build());
+                    }
+                });
             });
-            //return Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        public static async Task OnMessageReceivedAsync(IMessage socketMessage)
+        public async Task OnMessageReceivedAsync(IMessage message)
         {
-            if (socketMessage.Channel is SocketGuildChannel channel)
+            if (message.Author.IsBot || message.Author.IsWebhook)
             {
-                await Task.Run(() =>
+                return;
+            }
+            if (message.Channel is SocketGuildChannel channel)
+            {
+                _ = Task.Run(() =>
                 {
-                    if (socketMessage.Author.IsBot) return;
-                    if (socketMessage.Author.IsWebhook) return;
-                    Moderator.Moderate(socketMessage, channel, true);
+                    if (message.Author.IsBot) return;
+                    if (message.Author.IsWebhook) return;
+                    Moderator.Moderate(message, channel, true);
                 });
+            }
+            if (message.Channel is SocketDMChannel dMChannel)
+            {
+                ulong? qMessageId = message?.Reference?.MessageId.Value;
+                if (qMessageId == null)
+                {
+                    _ = message.Channel.SendMessageAsync("Ответьте на сообщение с вопросом для получения роли.");
+                    return;
+                }
+                using var db = new Database();
+                var dbUser = db.GetUserByQuestion(qMessageId.Value, message.Author.Id);
+                db.BeginTransaction();
+                if (dbUser.Introduced == "unknown")
+                {
+                    dbUser.Introduced = message.Content;
+                    qMessageId = message.Channel.SendMessageAsync("2. Кто вас пригласил в гилдьдию?").Result.Id;
+                    dbUser.QMessageId = qMessageId;
+                    db.UpdateUser(dbUser);
+                    await db.CommitAsync();
+                } 
+                else if (dbUser.Invited == "unknown")
+                {
+                    Logger.Log(LogSeverity.Debug, "add user", "invited added");
+                    dbUser.Invited = message.Content;
+                    db.UpdateUser(dbUser);
+                    await db.CommitAsync();
+                    var guild = _client.GetGuild(dbUser.GuildId);
+                    var user = guild.GetUser(message.Author.Id);
+                    ulong bRoleId = dbUser.GuildNavigation.BaseRole;
+                    if (bRoleId == 0)
+                    {
+                        return;
+                    }
+                    var bRole = guild.GetRole(dbUser.GuildNavigation.BaseRole);
+                    if (user == null)
+                    {
+                        Logger.Log(LogSeverity.Error, "AddBaseRole", $"No user with id {message.Author.Id} in guild {guild.Id}, question message id {qMessageId}");
+                        return;
+                    }
+                    await user.AddRoleAsync(bRole);
+                    _ = message.Channel.SendMessageAsync($"Вам выдана базовая роль {bRole.Name} в гильдии {guild.Name}.");
+                }
             }
         }
 
-        private async Task OnSelectMenuExecuted(SocketMessageComponent component)
+        private Task OnSelectMenuExecuted(SocketMessageComponent component)
         {
-            await Task.Run(async () =>
+            _ = Task.Run(() =>
             {
                 var commandHandler = new CybershokeCommandHandler(component);
                 var command = commandHandler.CreateCommand();
-                await component.RespondAsync(command.GetResult());
+                _ = component.RespondAsync(command.GetResult());
             });
+            return Task.CompletedTask;
         }
     }
 }

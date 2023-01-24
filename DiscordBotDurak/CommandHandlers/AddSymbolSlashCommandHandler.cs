@@ -12,12 +12,14 @@ namespace DiscordBotDurak.CommandHandlers
         private readonly string _content;
         private readonly bool _exluded;
         private readonly string _list;
+        private readonly ulong _guildId;
 
         public AddSymbolSlashCommandHandler(SocketSlashCommand command)
         {
             _content = (string)command.Data.Options.First(op => op.Name == "content").Value;
             _exluded = (bool)command.Data.Options.First(op => op.Name == "excluded").Value;
             _list = (string)command.Data.Options.First(op => op.Name == "list").Value;
+            _guildId = command.GuildId.Value;
         }
 
         private void RemoveUnexistingLists(List<ulong> lists)
@@ -34,7 +36,7 @@ namespace DiscordBotDurak.CommandHandlers
             RemoveUnexistingLists(lists);
             if (lists.Count == 0)
                 return new AddSymbolsCommand(new Exception("No exinsting lists found."));
-            else return new AddSymbolsCommand(lists, _content, _exluded);
+            else return new AddSymbolsCommand(lists, _content, _exluded, _guildId);
         }
     }
 }

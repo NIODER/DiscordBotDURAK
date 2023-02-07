@@ -14,18 +14,19 @@ namespace DiscordBotDurak.Commands
 {
     internal class InfoCommand : ICommand
     {
-        private const string NONE = "empty";
         private readonly InfoSlashCommandHandler.Type _type;
         private readonly SocketGuildUser _user;
         private readonly SocketChannel _channel;
         private readonly SocketGuild _guild;
+        private readonly ulong _listId;
 
-        public InfoCommand(InfoSlashCommandHandler.Type type, SocketGuildUser user, SocketChannel channel, SocketGuild guild)
+        public InfoCommand(InfoSlashCommandHandler.Type type, SocketGuildUser user, SocketChannel channel, SocketGuild guild, ulong listId)
         {
             _type = type;
             _user = user;
             _channel = channel;
             _guild = guild;
+            _listId = listId;
         }
 
         private string GetModeration(short moderation)
@@ -94,12 +95,32 @@ namespace DiscordBotDurak.Commands
             return info;
         }
 
+        private StringBuilder GetListInfo(ulong listId, ulong guildId)
+        {
+            var info = new StringBuilder($"Info about list {listId}:\n");
+            using var db = new Database();
+            var sl = db.GetSymbolsList(listId);
+            if (sl is null)
+            {
+                info.AppendLine("List does not exists.");
+                return info;
+            }
+            info.AppendLine($"Title: {sl.Title},");
+            info.AppendLine($"Symbols count: {sl.Symbols.Count},");
+            info.AppendLine($"Current guild channels count: {db.GetChannelsContainsList(guildId, listId).Count()},");
+            info.AppendLine($"Guilds count: {sl.Guilds.Count}");
+            info.AppendLine($"Symbols (\"e\" if excluded, overwise \"i\"):\n{db.GetSymbolObjects(listId)
+                .Select(s => $"{s.Content}({(s.IsExcluded ? "e" : "i")})").Aggregate((s1, s2) => $"{s1}, {s2}")}");
+            return info;
+        }
+
         public CommandResult GetResult()
         {
             var info = _type switch
             {
                 InfoSlashCommandHandler.Type.Guild => GetGuildInfo(_guild),
                 InfoSlashCommandHandler.Type.Channel => GetChannelInfo(_channel as SocketGuildChannel),
+                InfoSlashCommandHandler.Type.List => GetListInfo(_listId, _guild.Id),
                 InfoSlashCommandHandler.Type.User => GetUserInfo(_user),
                 _ => null
             };

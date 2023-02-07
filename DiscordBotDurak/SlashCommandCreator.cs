@@ -23,7 +23,6 @@ namespace DiscordBotDurak
                 RemoderateSlashCommand(),
                 SetPrivelegeSlashCommand(),
                 GetSymbolsListsSlashCommand(),
-                GetSymbolsSlashCommand(),
                 AddListSlashCommand(),
                 AddSymbolsToListSlashCommand(),
                 RemoveSymbolSlashCommand(),
@@ -133,14 +132,6 @@ namespace DiscordBotDurak
                     .AddChoice("guild", 0)
                     .AddChoice("channel", 1)
                     .WithRequired(true));
-        }
-
-        private SlashCommandBuilder GetSymbolsSlashCommand()
-        {
-            return new SlashCommandBuilder()
-                .WithName("get-symbols")
-                .WithDescription("Returns symbols from specified list")
-                .AddOption("lists", ApplicationCommandOptionType.String, "Lists ids separated by \',\'", isRequired: true);
         }
 
         private SlashCommandBuilder AddListSlashCommand()
@@ -285,6 +276,15 @@ namespace DiscordBotDurak
                         .WithType(ApplicationCommandOptionType.Channel)
                         .WithRequired(true)))
                 .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("list")
+                    .WithDescription("Info about symbols list.")
+                    .WithType(ApplicationCommandOptionType.SubCommand)
+                    .AddOption(new SlashCommandOptionBuilder()
+                        .WithName("list-id")
+                        .WithDescription("Id of list.")
+                        .WithType(ApplicationCommandOptionType.Number)
+                        .WithRequired(true)))
+                .AddOption(new SlashCommandOptionBuilder()
                     .WithName("user")
                     .WithDescription("Info about user.")
                     .WithType(ApplicationCommandOptionType.SubCommand)
@@ -307,6 +307,25 @@ namespace DiscordBotDurak
                     .AddChoice("ForbiddenSymbols", 1)
                     .AddChoice("User", 2)
                     .WithRequired(true));
+        }
+
+        private SlashCommandBuilder MailingListSlashCommand()
+        {
+            return new SlashCommandBuilder().WithName("mailing")
+                .WithDescription("Get, set, or read bot mailing list. (Notifications to administrators)")
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("action")
+                    .WithDescription("Get, add or read about mailing list.")
+                    .WithType(ApplicationCommandOptionType.Integer)
+                    .AddChoice("add", (int)MailingAction.Add)
+                    .AddChoice("delete", (int)MailingAction.Delete)
+                    .AddChoice("get-all", (int)MailingAction.GetAll)
+                    .WithRequired(true))
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("user")
+                    .WithDescription("User you want add or remove from mailing list.")
+                    .WithType(ApplicationCommandOptionType.User)
+                    .WithRequired(false));
         }
     }
 }

@@ -97,6 +97,11 @@ namespace DiscordBotDurak
                 {
                     Logger.Log(LogSeverity.Info, "Spy", $"User {user.Id} message sent to {user.Guild.OwnerId}. guild id: {user.Guild.Id}.");
                     _ = user.Guild.Owner.SendMessageAsync($"User {user.DisplayName} was last active {diff.Days} days ago.");
+                    foreach (var admin in db.GetAllMailing(user.Guild.Id))
+                    {
+                        _ = user.Guild.GetUser(admin.UserId).SendMessageAsync($"User {user.DisplayName} (guild: {user.Guild.Name}) was last active {diff.Days} days ago.\n" +
+                            $"To disable this notifications execute command \"/mailing delete\" and choose yourself in \"user\" parameter.");
+                    }
                     db.BeginTransaction();
                     dbUser.LastActiveAt = DateTime.Now;
                     db.UpdateUser(dbUser);

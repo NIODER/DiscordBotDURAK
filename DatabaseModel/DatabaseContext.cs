@@ -87,6 +87,9 @@ namespace DatabaseModel.Context
                     .HasForeignKey(u => u.GuildId);
                 user.Property(u => u.QMessageId)
                     .IsRequired(false);
+                user.Property(u => u.Mailing)
+                    .HasDefaultValue(false)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<Channel>(channel =>

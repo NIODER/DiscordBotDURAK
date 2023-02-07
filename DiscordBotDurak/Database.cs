@@ -272,7 +272,9 @@ namespace DiscordBotDurak.Data
         
         public SymbolsList GetSymbolsList(ulong symbolsListId)
         {
-            return Context.SymbolsLists.Include(sl => sl.Guilds).AsQueryable()
+            return Context.SymbolsLists.Include(sl => sl.Guilds)
+                .Include(sl => sl.SymbolsListsToSymbols)
+                .Include(sl => sl.Symbols).AsQueryable()
                 .FirstOrDefault(sl => sl.ListId == symbolsListId);
         }
         
@@ -298,24 +300,6 @@ namespace DiscordBotDurak.Data
                 .Select(sltc => sltc.SymbolsListNavigation).ToList();
         }
 
-        public List<SymbolObject> GetChannelBanSymbols(ulong channelId)
-        {
-            return Context.SymbolsListsToChannels.AsQueryable()
-                .Where(sltc => sltc.ChannelId == channelId)
-                .Join(Context.SymbolsLists.AsQueryable(),
-                      sltc => sltc.ListId,
-                      sl => sl.ListId,
-                      (sltc, sl) => sl)
-                .Join(Context.SymbolsListsToSymbols.AsQueryable(),
-                      sl => sl.ListId,
-                      slts => slts.ListId,
-                      (sl, slts) => new { slts.SymbolId, slts.IsExcluded, sl.ListId })
-                .Join(Context.Symbols.AsQueryable(),
-                      slts => slts.SymbolId,
-                      s => s.SymbolId,
-                      (slts, s) => new SymbolObject(s.SymbolId, s.Content, slts.IsExcluded, slts.ListId))
-                .ToList();
-        }
 
 
         public ulong? GetResendChannelId(ulong channelId, ulong symbolsListId)
@@ -411,6 +395,44 @@ namespace DiscordBotDurak.Data
                 .FirstOrDefault(sl => sl.ListId == symbolsListId)?.Symbols;
         }
 
+        public List<SymbolObject> GetSymbolObjects(ulong symbolsListId)
+        {
+            return Context.SymbolsListsToChannels.AsQueryable()
+                .Where(sltc => sltc.ListId == symbolsListId)
+                .Join(Context.SymbolsLists.AsQueryable(),
+                      sltc => sltc.ListId,
+                      sl => sl.ListId,
+                      (sltc, sl) => sl)
+                .Join(Context.SymbolsListsToSymbols.AsQueryable(),
+                      sl => sl.ListId,
+                      slts => slts.ListId,
+                      (sl, slts) => new { slts.SymbolId, slts.IsExcluded, sl.ListId })
+                .Join(Context.Symbols.AsQueryable(),
+                      slts => slts.SymbolId,
+                      s => s.SymbolId,
+                      (slts, s) => new SymbolObject(s.SymbolId, s.Content, slts.IsExcluded, slts.ListId))
+                .ToList();
+        }
+
+        public List<SymbolObject> GetChannelBanSymbols(ulong channelId)
+        {
+            return Context.SymbolsListsToChannels.AsQueryable()
+                .Where(sltc => sltc.ChannelId == channelId)
+                .Join(Context.SymbolsLists.AsQueryable(),
+                      sltc => sltc.ListId,
+                      sl => sl.ListId,
+                      (sltc, sl) => sl)
+                .Join(Context.SymbolsListsToSymbols.AsQueryable(),
+                      sl => sl.ListId,
+                      slts => slts.ListId,
+                      (sl, slts) => new { slts.SymbolId, slts.IsExcluded, sl.ListId })
+                .Join(Context.Symbols.AsQueryable(),
+                      slts => slts.SymbolId,
+                      s => s.SymbolId,
+                      (slts, s) => new SymbolObject(s.SymbolId, s.Content, slts.IsExcluded, slts.ListId))
+                .ToList();
+        }
+
         public Symbol FindSymbol(string symbol)
         {
             return Context.Symbols.FirstOrDefault(s => s.Content == symbol);
@@ -497,6 +519,34 @@ namespace DiscordBotDurak.Data
             return Context.GuildUsers
                 .Include(u => u.GuildNavigation)
                 .FirstOrDefault(u => u.UserId == userId && u.QMessageId == qMessageId);
+        }
+
+        public List<GuildUser> GetAllMailing(ulong guildId)
+        {
+            return Context.GuildUsers.AsQueryable()
+                .Where(u => u.GuildId == guildId)
+                .Where(u => u.Mailing).ToList();
+        }
+
+        /// <summary>
+        /// Sets <see cref="GuildUser.Mailing"/> user parameter.
+        /// </summary>
+        /// <param name="guildId">id of current guild</param>
+        /// <param name="userId">id of specified user</param>
+        /// <param name="mailing">true if need to send notifications to this user</param>
+        /// <exception cref="NullReferenceException"/>
+        public void SetMailing(ulong guildId, ulong userId, bool mailing)
+        {
+            var user = Context.GuildUsers.AsQueryable()
+                .Where(u => u.GuildId == guildId)
+                .FirstOrDefault(u => u.UserId == userId);
+            if (user is null)
+            {
+                Logger.Log(LogSeverity.Error, "Database.SetMailing", "No user in database.");
+                throw new NullReferenceException("No such user in database.");
+            }
+            user.Mailing = mailing;
+            UpdateUser(user);
         }
 
         /// <summary>

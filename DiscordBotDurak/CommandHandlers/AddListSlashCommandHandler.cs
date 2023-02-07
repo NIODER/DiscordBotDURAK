@@ -19,8 +19,20 @@ namespace DiscordBotDurak.CommandHandlers
         public AddListSlashCommandHandler(SocketSlashCommand command)
         {
             _scope = (long)command.Data.Options.First(op => op.Name == "scope").Value;
-            _list = (ulong?)command.Data.Options.FirstOrDefault(op => op.Name == "list-id")?.Value;
-            _moderationMode = (ModerationMode?)(long?)command.Data.Options.FirstOrDefault(op => op.Name == "moderation")?.Value;
+            var opt = command.Data.Options.FirstOrDefault(op => op.Name == "list-id")?.Value;
+            if (opt is not null)
+            {
+                try
+                {
+                    _list = Convert.ToUInt64(opt);
+                }
+                catch (OverflowException e)
+                {
+                    _list = 0;
+                    Logger.Log(Discord.LogSeverity.Info, GetType().Name, "_list overflow exception.", e);
+                }
+            }
+            _moderationMode = (ModerationMode?)(long?)(command.Data.Options.FirstOrDefault(op => op.Name == "moderation")?.Value);
             _title = (string)command.Data.Options.FirstOrDefault(op => op.Name == "title")?.Value;
             _resendChannelId = ((SocketChannel)command.Data.Options.FirstOrDefault(op => op.Name == "resend-channel")?.Value)?.Id;
             _guildId = command.GuildId ?? 0;

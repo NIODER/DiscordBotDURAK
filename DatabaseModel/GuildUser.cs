@@ -17,6 +17,7 @@ namespace DatabaseModel
         public string? Invited { get; set; }
         public string? Introduced { get; set; }
         public ulong? QMessageId { get; set; }
+        public bool Mailing { get; set; }
 
         [JsonIgnore]
         public Guild? GuildNavigation { get; set; }

@@ -311,7 +311,6 @@ namespace DiscordBotDurak
                     "delete" => new DeleteCommandHandler(slashCommand),
                     "set-privelege" => new SetPrivelegeSlashCommandHandler(slashCommand),
                     "get-lists" => new GetSymbolsListsSlashCommandHandler(slashCommand),
-                    "get-symbols" => new GetSymbolsSlashCommandHandler(slashCommand),
                     "list" => new AddListSlashCommandHandler(slashCommand),
                     "add-symbol" => new AddSymbolSlashCommandHandler(slashCommand),
                     "remove-list" => new RemoveListSlashCommandHandler(slashCommand),
@@ -323,6 +322,7 @@ namespace DiscordBotDurak
                     "spy-mode" => new SetSpyModeSlashCommandHandler(slashCommand),
                     "info" => new InfoSlashCommandHandler(slashCommand),
                     "help" => new HelpCommandHandler(slashCommand),
+                    "mailing" => new MailingListSlashCommandHandler(slashCommand),
                     _ => throw new ArgumentOutOfRangeException("CommandName")
                 };
                 var command = commandHandler.CreateCommand();

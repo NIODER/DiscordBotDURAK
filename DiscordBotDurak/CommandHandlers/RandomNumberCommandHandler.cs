@@ -1,14 +1,13 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Exceptions;
+using DiscordBotDurak.Verification;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    public class RandomNumberCommandHandler : ICommandHandler
+    internal class RandomNumberCommandHandler : AvailableToEveryone, ICommandHandler
     {
         private readonly long max;
         private readonly long min;

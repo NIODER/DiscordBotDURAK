@@ -2,6 +2,7 @@
 using Discord;
 using Discord.WebSocket;
 using DiscordBotDurak.Data;
+using DiscordBotDurak.Verification;
 using System;
 
 namespace DiscordBotDurak.Commands

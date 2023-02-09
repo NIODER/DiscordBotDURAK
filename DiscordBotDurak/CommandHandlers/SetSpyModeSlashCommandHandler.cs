@@ -1,11 +1,12 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Enum.ModerationModes;
+using DiscordBotDurak.Verification;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class SetSpyModeSlashCommandHandler : ICommandHandler
+    internal class SetSpyModeSlashCommandHandler : AvailableToAdmin, ICommandHandler
     {
         private readonly SpyModesEnum _spyMode;
         private readonly SocketGuild _socketGuild;

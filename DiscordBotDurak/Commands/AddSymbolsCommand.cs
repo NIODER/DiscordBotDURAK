@@ -2,6 +2,7 @@
 using Discord;
 using DiscordBotDurak.Data;
 using DiscordBotDurak.Enum.ModerationModes;
+using DiscordBotDurak.Verification;
 using System;
 using System.Collections.Generic;
 using System.Text;

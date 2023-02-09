@@ -1,10 +1,11 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
+using DiscordBotDurak.Verification;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class WarningMessageSlashCommandHandler : ICommandHandler
+    internal class WarningMessageSlashCommandHandler : AvailableToAdmin, ICommandHandler
     {
         private readonly ulong _channelId;
         private readonly string _message;

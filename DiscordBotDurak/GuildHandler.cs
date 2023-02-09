@@ -37,7 +37,7 @@ namespace DiscordBotDurak
             _ = message.Result.DeleteAsync();
             var message1 = await guild.DefaultChannel.SendMessageAsync("Ready!");
             await Task.Delay(30000);
-            _ =message1.DeleteAsync();
+            _ = message1.DeleteAsync();
         }
 
         public static async Task ProcessChannel(SocketGuildChannel channel)

@@ -53,7 +53,7 @@ namespace DiscordBotDurak.Commands
             {
                 db.BeginTransaction();
                 db.SetMailing(guildId, userId, mailing);
-                _ = db.CommitAsync();
+                db.CommitAsync().Wait();
             }
             catch (NullReferenceException)
             {

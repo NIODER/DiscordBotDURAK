@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    public class SetPrivelegeSlashCommandHandler : ICommandHandler
+    internal class SetPrivelegeSlashCommandHandler : IVerifiable, ICommandHandler
     {
         private const string commandName = "Set privelege command";
         private readonly BotRole privelege;
@@ -38,28 +38,15 @@ namespace DiscordBotDurak.CommandHandlers
             return dbCommandAuthor.Role >= (short)privelege;
         }
 
-        private bool HasAccessToCommand(GuildUser dbCommandAuthor)
-        {
-            _ = Logger.Instance().LogAsync(new Discord.LogMessage(Discord.LogSeverity.Info,
-                commandName,
-                $"executor role: {dbCommandAuthor.Role} ({(BotRole)dbCommandAuthor.Role})"));
-            return dbCommandAuthor.Role >= (short)BotRole.Admin;
-        }
-
         public ICommand CreateCommand()
         {
-            if (!(author is SocketGuildUser gAuthor))
+            if (author is not SocketGuildUser gAuthor)
                 return new SetPrivelegeCommand(
                     new DiscordBotSlashCommandException(
                         commandName, 
                         "This command can't be executed in direct message channel."));
-            var db = new Database();
+            using var db = new Database();
             var botCommandExecutor = db.GetUser(gAuthor.Guild.Id, gAuthor.Id);
-            if (!HasAccessToCommand(botCommandExecutor))
-                return new SetPrivelegeCommand(
-                    new DiscordBotSlashCommandException(
-                        commandName,
-                        "This user has no access to this command."));
             if (!ValidateRoleAccess(botCommandExecutor))
                 return new SetPrivelegeCommand(
                     new DiscordBotSlashCommandException(
@@ -72,6 +59,13 @@ namespace DiscordBotDurak.CommandHandlers
                         commandName,
                         "You cannot reassign a role from a senior member."));
             return new SetPrivelegeCommand(privelege, botUser, user.Mention);
+        }
+
+        public bool Verify(ulong userId, ulong guildId)
+        {
+            using var db = new Database();
+            var user = db.GetUser(guildId, userId);
+            return user.Role >= (short)BotRole.Admin;
         }
     }
 }

@@ -1,11 +1,12 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
+using DiscordBotDurak.Verification;
 using System;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class RemoveSymbolSlashCommandHandler : ICommandHandler
+    internal class RemoveSymbolSlashCommandHandler : AvailableToAdmin, ICommandHandler
     {
         private readonly ulong _symbolId;
         private readonly string _lists;

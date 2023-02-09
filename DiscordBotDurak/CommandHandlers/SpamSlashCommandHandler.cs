@@ -1,12 +1,13 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Exceptions;
+using DiscordBotDurak.Verification;
 using System;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    public class SpamSlashCommandHandler : ICommandHandler
+    internal class SpamSlashCommandHandler : AvailableToModerator, ICommandHandler
     {
         private readonly long count;
         private readonly string content;

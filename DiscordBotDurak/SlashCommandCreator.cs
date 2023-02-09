@@ -34,7 +34,8 @@ namespace DiscordBotDurak
                 GiveimmunitySlashCommand(),
                 SetSpyRegimeSlashCommand(),
                 InfoSlashCommand(),
-                GetCreateHelpSlashCommand()
+                GetCreateHelpSlashCommand(),
+                MailingListSlashCommand()
             };
         }
 
@@ -317,9 +318,9 @@ namespace DiscordBotDurak
                     .WithName("action")
                     .WithDescription("Get, add or read about mailing list.")
                     .WithType(ApplicationCommandOptionType.Integer)
-                    .AddChoice("add", (int)MailingAction.Add)
-                    .AddChoice("delete", (int)MailingAction.Delete)
-                    .AddChoice("get-all", (int)MailingAction.GetAll)
+                    .AddChoice("enable", (int)MailingAction.Add)
+                    .AddChoice("disable", (int)MailingAction.Delete)
+                    .AddChoice("get-mailing-list", (int)MailingAction.GetAll)
                     .WithRequired(true))
                 .AddOption(new SlashCommandOptionBuilder()
                     .WithName("user")

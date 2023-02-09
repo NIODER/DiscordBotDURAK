@@ -1,10 +1,11 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Exceptions;
+using DiscordBotDurak.Verification;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    public class RemoderateCommandHandler : ICommandHandler
+    internal class RemoderateCommandHandler : AvailableToModerator, ICommandHandler
     {
         private readonly SocketGuildChannel channel;
         private readonly ulong authorId;

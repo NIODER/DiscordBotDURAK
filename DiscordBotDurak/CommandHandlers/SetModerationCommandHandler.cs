@@ -1,12 +1,13 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Enum.ModerationModes;
+using DiscordBotDurak.Verification;
 using System;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class SetModerationCommandHandler : ICommandHandler
+    internal class SetModerationCommandHandler : AvailableToAdmin, ICommandHandler
     {
         private readonly ulong _channelId;
         private readonly ModerationMode _moderationMode;

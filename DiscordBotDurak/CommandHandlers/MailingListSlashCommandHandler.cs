@@ -1,28 +1,36 @@
-﻿using DatabaseModel;
-using Discord.WebSocket;
+﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
-using System;
-using System.Collections.Generic;
+using DiscordBotDurak.Data;
+using DiscordBotDurak.Enum.BotRoles;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class MailingListSlashCommandHandler : ICommandHandler
+    internal class MailingListSlashCommandHandler : IVerifiable, ICommandHandler
     {
         private readonly SocketGuildUser _user;
         private readonly MailingAction _action;
 
         public MailingListSlashCommandHandler(SocketSlashCommand command)
         {
-            _action = (MailingAction)command.Data.Options.First(op => op.Name == "action").Value;
+            _action = (MailingAction)(long)command.Data.Options.First(op => op.Name == "action").Value;
             _user = (SocketGuildUser)command.Data.Options.FirstOrDefault(op => op.Name == "user")?.Value;
         }
 
         public ICommand CreateCommand()
         {
             return new MailingListCommand(_user, _action);
+        }
+
+        public bool Verify(ulong userId, ulong guildId)
+        {
+            using var db = new Database();
+            var user = db.GetUser(guildId, userId);
+            if (_user.Id == userId && _action == MailingAction.Delete)
+            {
+                return true;
+            }
+            return user.Role >= (short)BotRole.Admin;
         }
     }
 }

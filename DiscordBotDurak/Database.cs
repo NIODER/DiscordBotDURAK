@@ -566,7 +566,7 @@ namespace DiscordBotDurak.Data
                 catch (Exception e)
                 {
                     Exception = e;
-                    Logger.Log(LogSeverity.Info, GetType().Name, $"Transaction commit exception.", Exception);
+                    Logger.Log(LogSeverity.Info, GetType().Name, $"Transaction commit exception", Exception);
                     await Transaction.RollbackAsync();
                     successfully = false;
                 }

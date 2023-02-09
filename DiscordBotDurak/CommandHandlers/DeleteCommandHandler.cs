@@ -1,11 +1,12 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Enum.Commands;
+using DiscordBotDurak.Verification;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    public class DeleteCommandHandler : ICommandHandler
+    internal class DeleteCommandHandler : AvailableToModerator, ICommandHandler
     {
         private readonly ISocketMessageChannel channel;
         private readonly long type;

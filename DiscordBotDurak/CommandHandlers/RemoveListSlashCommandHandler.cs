@@ -1,12 +1,13 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
+using DiscordBotDurak.Verification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class RemoveListSlashCommandHandler : ICommandHandler
+    internal class RemoveListSlashCommandHandler : AvailableToAdmin, ICommandHandler
     {
         private readonly int _scope;
         private readonly string _lists;

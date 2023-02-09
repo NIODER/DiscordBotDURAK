@@ -1,11 +1,12 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
+using DiscordBotDurak.Verification;
 using System;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class InfoSlashCommandHandler : ICommandHandler
+    internal class InfoSlashCommandHandler : AvailableToModerator, ICommandHandler
     {
         public enum Type
         {

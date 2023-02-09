@@ -1,8 +1,9 @@
 ﻿using DiscordBotDurak.Commands;
+using DiscordBotDurak.Verification;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    public class RandomDecideCommandHandler : ICommandHandler
+    internal class RandomDecideCommandHandler : AvailableToEveryone, ICommandHandler
     {
         public ICommand CreateCommand() => new RandomDecideCommand();
     }

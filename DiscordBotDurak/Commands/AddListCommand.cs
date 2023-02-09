@@ -2,12 +2,9 @@
 using Discord;
 using DiscordBotDurak.Data;
 using DiscordBotDurak.Enum.ModerationModes;
-using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
-using System;
+using DiscordBotDurak.Verification;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Linq;
-using System.Text;
 
 namespace DiscordBotDurak.Commands
 {

@@ -34,8 +34,7 @@ namespace DiscordBotDurak
                                  GatewayIntents.GuildMessages |
                                  GatewayIntents.GuildMessageTyping |
                                  GatewayIntents.MessageContent |
-                                 GatewayIntents.DirectMessages,
-                HandlerTimeout = 4000
+                                 GatewayIntents.DirectMessages
             };
             _client = new DiscordSocketClient(config);
             _client.Log += logger.LogAsync;
@@ -73,6 +72,7 @@ namespace DiscordBotDurak
                     break;
                 }
             }
+            await _client.StopAsync();
         }
 
         private async Task OnChannelCreated(SocketChannel channel)
@@ -296,7 +296,7 @@ namespace DiscordBotDurak
         {
             Logger.Log(LogSeverity.Info, GetType().Name, $"slash command {slashCommand.CommandName} executed");
             _ = slashCommand.RespondAsync("Processing...");
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 if (slashCommand.Channel is not SocketGuildChannel) return;
                 ICommandHandler commandHandler = slashCommand.CommandName switch
@@ -325,6 +325,26 @@ namespace DiscordBotDurak
                     "mailing" => new MailingListSlashCommandHandler(slashCommand),
                     _ => throw new ArgumentOutOfRangeException("CommandName")
                 };
+                var verifiable = commandHandler as IVerifiable;
+                if (!verifiable.Verify(slashCommand.User.Id, slashCommand.GuildId.Value))
+                {
+                    Logger.Log(LogSeverity.Info, "OnSlashCommandExecuted", "User has no access to command.");
+                    _ = slashCommand.ModifyOriginalResponseAsync(pr =>
+                    {
+                        pr.Content = null;
+                        pr.Embeds = null;
+                        pr.Embed = new EmbedBuilder()
+                            .WithColor(Color.Red)
+                            .AddField("Access violation", "You have no access to this command.")
+                            .WithFooter("command")
+                            .WithCurrentTimestamp()
+                            .Build();
+                        pr.Components = null;
+                    });
+                    await Task.Delay(30000);
+                    await slashCommand.DeleteOriginalResponseAsync();
+                    return;
+                }
                 var command = commandHandler.CreateCommand();
                 var commandResult = command.GetResult();
                 _ = slashCommand.ModifyOriginalResponseAsync(pr =>

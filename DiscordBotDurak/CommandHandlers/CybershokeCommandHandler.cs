@@ -1,12 +1,12 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
+using DiscordBotDurak.Verification;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    public class CybershokeCommandHandler : ICommandHandler
+    internal class CybershokeCommandHandler : AvailableToEveryone, ICommandHandler
     {
         private enum CommandType
         {

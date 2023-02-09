@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Exceptions;
 using DiscordBotDurak.Mentions;
+using DiscordBotDurak.Verification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    public class RandomUserCommandHandler : ICommandHandler
+    internal class RandomUserCommandHandler : AvailableToEveryone, ICommandHandler
     {
         private readonly List<ulong> users;
         private readonly long count;

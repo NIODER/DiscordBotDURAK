@@ -1,11 +1,11 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
-using System.Collections.Generic;
+using DiscordBotDurak.Verification;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class GetSymbolsListsSlashCommandHandler : ICommandHandler
+    internal class GetSymbolsListsSlashCommandHandler : AvailableToAdmin, ICommandHandler
     {
         private readonly long _scope;
         private readonly ulong _guildId;

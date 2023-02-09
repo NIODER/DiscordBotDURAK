@@ -88,8 +88,7 @@ namespace DatabaseModel.Context
                 user.Property(u => u.QMessageId)
                     .IsRequired(false);
                 user.Property(u => u.Mailing)
-                    .HasDefaultValue(false)
-                    .IsRequired(false);
+                    .HasDefaultValue(false);
             });
 
             modelBuilder.Entity<Channel>(channel =>

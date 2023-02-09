@@ -1,14 +1,11 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
-using System;
-using System.Collections.Generic;
+using DiscordBotDurak.Verification;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class HelpCommandHandler : ICommandHandler
+    internal class HelpCommandHandler : AvailableToEveryone, ICommandHandler
     {
         private readonly long _variant;
 

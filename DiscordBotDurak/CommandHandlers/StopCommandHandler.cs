@@ -1,11 +1,12 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Enum.Commands;
+using DiscordBotDurak.Verification;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    public class StopCommandHandler : ICommandHandler
+    internal class StopCommandHandler : AvailableToModerator, ICommandHandler
     {
         private readonly CommandType commandType;
         private readonly ulong authorId;

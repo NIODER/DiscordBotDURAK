@@ -1,13 +1,14 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Data;
+using DiscordBotDurak.Verification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class AddSymbolSlashCommandHandler : ICommandHandler
+    internal class AddSymbolSlashCommandHandler : AvailableToAdmin, ICommandHandler
     {
         private readonly string _content;
         private readonly bool _exluded;

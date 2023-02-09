@@ -1,10 +1,11 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
+using DiscordBotDurak.Verification;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class SetImmunitySlashCommandHandler : ICommandHandler
+    internal class SetImmunitySlashCommandHandler : AvailableToAdmin, ICommandHandler
     {
         private readonly SocketUser _user;
         private readonly bool _enableImmunity;

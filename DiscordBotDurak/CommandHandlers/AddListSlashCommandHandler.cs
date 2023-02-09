@@ -1,12 +1,13 @@
 ﻿using Discord.WebSocket;
 using DiscordBotDurak.Commands;
 using DiscordBotDurak.Enum.ModerationModes;
+using DiscordBotDurak.Verification;
 using System;
 using System.Linq;
 
 namespace DiscordBotDurak.CommandHandlers
 {
-    internal class AddListSlashCommandHandler : ICommandHandler
+    internal class AddListSlashCommandHandler : AvailableToAdmin, ICommandHandler
     {
         private readonly long _scope;
         private readonly ulong? _list;

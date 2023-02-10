@@ -22,60 +22,53 @@ namespace DiscordBotDurak.CommandHandlers
         {
             users = new List<ulong>();
             exception = null;
-            var mentionString = (string)slashCommand.Data.Options.Where(option => option.Name == "mentions").First().Value;
-            var countOption = slashCommand.Data.Options.Where(options => options.Name == "count");
-            count = countOption.Count() < 1 ? 1 : (long)countOption.First().Value; // если не указали count, то он 1
-            if (slashCommand.Channel is IGuildChannel)
-            {
-                users = (List<ulong>)ProcessMentionsAsync(mentionString.Split(','), slashCommand.Channel as IGuildChannel).Result;
-                guild = (slashCommand.Channel as IGuildChannel).Guild;
-            }
+            var mentionString = (string)slashCommand.Data.Options.First(option => option.Name == "mentions").Value;
+            count = (long)(slashCommand.Data.Options.FirstOrDefault(options => options.Name == "count")?.Value ?? 1);
+            guild = ((IGuildChannel)slashCommand.Channel).Guild;
+            users = ProcessMentionsAsync(mentionString.Split(',')).Result;
             if (users.Count == 0)
                 exception = new SlashCommandPropertyException("mentions", slashCommand.CommandName, "no mentions found");
         }
 
-        private async Task<IEnumerable<ulong>> ProcessMentionsAsync(IEnumerable<string> mentions, IGuildChannel guildChannel)
+        private async IAsyncEnumerable<ulong> GetChannelUsersAsync(ulong channelId)
         {
-            var mentionsSeparated = new List<(ulong id, MentionType type)>();
-            foreach (var mention in mentions)
+            var channel = await guild.GetChannelAsync(channelId);
+            await foreach (var _users in channel.GetUsersAsync())
             {
-                try
-                {
-                    mentionsSeparated.Add(Utilities.FromMention(mention.Trim()));
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    continue;
-                }
+                if (_users.Any(u => u.VoiceChannel?.Id == channelId))
+                    foreach (var user in _users.Where(u => u.VoiceChannel?.Id == channelId))
+                        yield return user.Id;
+                else
+                    foreach (var user in _users)
+                        yield return user.Id;
             }
+        }
+
+        private async Task<List<ulong>> ProcessMentionsAsync(IEnumerable<string> mentions)
+        {
+            var mentionsSeparated = mentions.Select(m => Utilities.FromMention(m.Trim()));
             var users = new List<ulong>();
-            foreach (var mention in mentionsSeparated)
+            foreach (var (innerId, type) in mentionsSeparated)
             {
-                switch (mention.type)
+                switch (type)
                 {
                     case MentionType.User:
-                        users.Add(mention.id);
+                        users.Add(innerId);
                         break;
                     case MentionType.Channel:
-                        await foreach (var _users in guildChannel.Guild.GetChannelAsync(mention.id).Result.GetUsersAsync())
-                        {
-                            foreach (var user in _users)
-                            {
-                                users.Add(user.Id);
-                            }
-                        }
+                        await GetChannelUsersAsync(innerId).ForEachAsync(users.Add);
                         break;
                     case MentionType.Role:
-                        users.AddRange(guildChannel
-                            .Guild.GetUsersAsync().Result
-                            .Where(user => user.RoleIds.Contains(guildChannel.Guild.GetRole(mention.id).Id))
+                        users.AddRange(guild
+                            .GetUsersAsync().Result
+                            .Where(user => user.RoleIds.Contains(guild.GetRole(innerId).Id))
                             .Select(user => user.Id));
                         break;
                     case MentionType.Everyone:
-                        users.AddRange(guildChannel.Guild.GetUsersAsync().Result.Select(user => user.Id));
+                        users.AddRange(guild.GetUsersAsync().Result.Select(user => user.Id));
                         break;
                     case MentionType.Here:
-                        users.AddRange(guildChannel.Guild.GetUsersAsync().Result
+                        users.AddRange(guild.GetUsersAsync().Result
                             .Where(user => user.Status == UserStatus.Online)
                             .Select(user => user.Id));
                         break;

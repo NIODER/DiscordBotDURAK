@@ -86,7 +86,7 @@ namespace DiscordBotDurak
                 .AddField("New channel detected:", "Channel added in database with default settings.")
                 .WithFooter("DiscordBotDurak moderation")
                 .WithCurrentTimestamp().Build());
-            await GuildHandler.ProcessChannel(channel as SocketGuildChannel);
+            await new GuildHandler().ProcessChannel(channel as SocketGuildChannel);
         }
 
         private async Task OnChannelDestroyed(SocketChannel channel)
@@ -107,12 +107,13 @@ namespace DiscordBotDurak
         private Task OnGuildAvailable(SocketGuild guild)
         {
             Logger.Log(LogSeverity.Info, "OnGuildAvailable", "Guild available intent activated.");
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 using var db = new Database();
                 if (db.GetGuild(guild.Id) is null)
                 {
-                    GuildHandler.ProcessGuild(guild);
+                    var guildHandler = new GuildHandler();
+                    await guildHandler.ProcessGuild(guild);
                 }
             });
             _ = Task.Run(async () =>
@@ -284,12 +285,12 @@ namespace DiscordBotDurak
             return Task.CompletedTask;
         }
 
-        private Task OnMembersDownloaded(SocketGuild guild)
+        private async Task OnMembersDownloaded(SocketGuild guild)
         {
             Logger.Log(LogSeverity.Debug, "Program", "OnMembersDownloaded intent activated.");
             Logger.Log(LogSeverity.Debug, "OnMembersDownloaded", $"Members count {guild.Users.Count}");
-            GuildHandler.ProcessGuild(guild);
-            return Task.CompletedTask;
+            var guildHandler = new GuildHandler();
+            await guildHandler.ProcessGuild(guild);
         }
 
         private Task OnSlashCommandExecuted(SocketSlashCommand slashCommand)
@@ -310,6 +311,7 @@ namespace DiscordBotDurak
                     "info" => new InfoSlashCommandHandler(slashCommand),
                     "list" => new AddListSlashCommandHandler(slashCommand),
                     "mailing" => new MailingListSlashCommandHandler(slashCommand),
+                    "moderate" => new RemoderateCommandHandler(slashCommand),
                     "random-decide" => new RandomDecideCommandHandler(),
                     "random-distribute" => new RandomDistributionCommandHandler(slashCommand),
                     "random-user" => new RandomUserCommandHandler(slashCommand),

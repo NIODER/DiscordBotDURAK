@@ -86,7 +86,7 @@ namespace DiscordBotDurak.Commands
                 if (_moderationMode == ModerationMode.OnlyResend && _resendChannelId is null)
                 {
                     Logger.Log(LogSeverity.Info, GetType().Name, "No resend message specified for resend moderation mode.");
-                    return new CommandResult().WithException("Ypu need to attach resend channel for this moderation mode.");
+                    return new CommandResult().WithException("You need to attach resend channel for this moderation mode.");
                 }
                 db.BeginTransaction();
                 symbolsList = db.CreateSymbolsList(_title);

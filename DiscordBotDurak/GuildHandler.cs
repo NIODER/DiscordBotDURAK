@@ -5,26 +5,35 @@ using DiscordBotDurak.Data;
 using DiscordBotDurak.Enum.BotRoles;
 using DiscordBotDurak.Enum.ModerationModes;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace DiscordBotDurak
 {
-    public static class GuildHandler
+    public class GuildHandler
     {
-        public static async void ProcessGuild(SocketGuild guild)
+        private static readonly List<ulong> _processingGuilds = new();
+
+        public async Task ProcessGuild(SocketGuild guild)
         {
+            if (_processingGuilds.Any(id => id == guild.Id))
+            {
+                Logger.Log(LogSeverity.Info, GetType().Name, $"Guild {guild.Id} already in process");
+                return;
+            }
+            _processingGuilds.Add(guild.Id);
             var message = guild.DefaultChannel.SendMessageAsync("Processing your guild...");
             using var database = new Database();
             if (database.GetGuild(guild.Id) is null)
             {
-                Logger.Log(LogSeverity.Debug, "ProcessGuild", $"Guild is not in database");
+                Logger.Log(LogSeverity.Debug, "ProcessGuild", $"Guild {guild.Id} is not in database");
                 var guildOwnerDMChannel = guild.Owner.CreateDMChannelAsync().Result;
                 await guildOwnerDMChannel.SendMessageAsync(new Constants().GetOwnerMessage());
                 database.BeginTransaction();
                 database.AddGuild(new Guild() { GuildId = guild.Id });
                 if (database.CommitAsync().Result)
-                    Logger.Log(LogSeverity.Info, "GuildHandler", "Guild added successfully");
+                    Logger.Log(LogSeverity.Info, "GuildHandler", $"Guild {guild.Id} added successfully");
                 else Logger.Log(LogSeverity.Error,
                     "GuildHangler", 
                     "Exception occured while guild adding.", 
@@ -34,13 +43,14 @@ namespace DiscordBotDurak
             var processingUsersTasks = guild.Users.Select(ProcessUser).ToArray();
             Task.WaitAll(processingChannelTasks);
             Task.WaitAll(processingUsersTasks);
-            _ = message.Result.DeleteAsync();
+            _processingGuilds.Remove(guild.Id);
+            await message.Result.DeleteAsync();
             var message1 = await guild.DefaultChannel.SendMessageAsync("Ready!");
             await Task.Delay(30000);
-            _ = message1.DeleteAsync();
+            await message1.DeleteAsync();
         }
 
-        public static async Task ProcessChannel(SocketGuildChannel channel)
+        public async Task ProcessChannel(SocketGuildChannel channel)
         {
             using var database = new Database();
             if (database.GetChannel(channel.Id) is null)
@@ -55,7 +65,7 @@ namespace DiscordBotDurak
             }
         }
 
-        public static async Task ProcessUser(SocketGuildUser user)
+        public async Task ProcessUser(SocketGuildUser user)
         {
             using var db = new Database();
             if (db.GetUser(user.Guild.Id, user.Id) is null)

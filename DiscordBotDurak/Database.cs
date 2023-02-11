@@ -22,6 +22,7 @@ namespace DiscordBotDurak.Data
         public Exception Exception { get; private set; }
         public DatabaseContext Context { get; private set; }
         public IDbContextTransaction Transaction { get; private set; }
+        public const string COMMIT_SOURCE = "Commit";
 
         public Database()
         {
@@ -122,7 +123,6 @@ namespace DiscordBotDurak.Data
         {
             
             var guild1 = Context.Guilds.Add(guild);
-            Context.SaveChanges();
             Logger.Log(LogSeverity.Info, GetType().Name, $"Guild added {guild1.Entity}");
             return guild1.Entity;
         }   
@@ -549,6 +549,34 @@ namespace DiscordBotDurak.Data
             UpdateUser(user);
         }
 
+        public async Task LogInDatabase(LogMessage logMessage)
+        {
+            var log = new Logs()
+            {
+                LogSeverity = (short)logMessage.Severity,
+                Source = logMessage.Source,
+                Message = logMessage.Message,
+                Exception = logMessage.Exception?.ToString(),
+                Created = DateTime.UtcNow
+            };
+            Context.Logs.Add(log);
+            if (Transaction is not null)
+            {
+                try
+                {
+                    await Context.SaveChangesAsync();
+                    await Transaction.CommitAsync();
+                }
+                catch (Exception e)
+                {
+                    Exception = e;
+                    await Transaction.RollbackAsync();
+                }
+                Transaction.Dispose();
+                Transaction = null;
+            }
+        }
+
         /// <summary>
         /// Commits changes in database async.
         /// </summary>
@@ -566,7 +594,7 @@ namespace DiscordBotDurak.Data
                 catch (Exception e)
                 {
                     Exception = e;
-                    Logger.Log(LogSeverity.Info, GetType().Name, $"Transaction commit exception", Exception);
+                    Logger.Log(LogSeverity.Info, COMMIT_SOURCE, $"Transaction commit exception", Exception);
                     await Transaction.RollbackAsync();
                     successfully = false;
                 }
@@ -576,10 +604,10 @@ namespace DiscordBotDurak.Data
             else
             {
                 Exception = new ArgumentNullException("Transaction was null");
-                Logger.Log(LogSeverity.Info, GetType().Name, $"Transaction commit exception.", Exception);
+                Logger.Log(LogSeverity.Info, COMMIT_SOURCE, $"Transaction commit exception.", Exception);
                 successfully = false;
             }
-            Logger.Log(LogSeverity.Info, GetType().Name, $"Transaction commited");
+            Logger.Log(LogSeverity.Info, COMMIT_SOURCE, $"Transaction commited");
             return successfully;
         }
 
@@ -603,7 +631,7 @@ namespace DiscordBotDurak.Data
                     catch (Exception e)
                     {
                         Exception = e;
-                        Logger.Log(LogSeverity.Info, GetType().Name, 
+                        Logger.Log(LogSeverity.Info, COMMIT_SOURCE, 
                             $"Transaction sychronized commit exception.", Exception);
                         Transaction.Rollback();
                         successfully = false;
@@ -613,12 +641,12 @@ namespace DiscordBotDurak.Data
             else
             {
                 Exception = new ArgumentNullException("Transaction was null");
-                Logger.Log(LogSeverity.Info, GetType().Name,
+                Logger.Log(LogSeverity.Info, COMMIT_SOURCE,
                     $"Transaction sychronized commit exception.", Exception);
                 successfully = false;
             }
             Transaction = null;
-            Logger.Log(LogSeverity.Info, GetType().Name, $"Transaction syncronized commited");
+            Logger.Log(LogSeverity.Info, COMMIT_SOURCE, $"Transaction syncronized commited");
             return successfully;
         }
 

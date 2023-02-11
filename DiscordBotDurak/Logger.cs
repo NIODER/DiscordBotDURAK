@@ -1,6 +1,6 @@
 ﻿using Discord;
+using DiscordBotDurak.Data;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DiscordBotDurak
@@ -25,17 +25,19 @@ namespace DiscordBotDurak
 
         public async Task LogAsync(LogMessage logMessage)
         {
-            await Task.Run(() =>
+            if (logMessage.Severity <= minimalLogSeverity)
             {
-                if (logMessage.Severity <= minimalLogSeverity)
+                // log in db
+                using var db = new Database();
+                db.BeginTransaction();
+                await db.LogInDatabase(logMessage);
+
+                // log in console
+                lock (consoleSyncObj)
                 {
-                    lock (consoleSyncObj)
-                    {
-                        Console.WriteLine(logMessage.ToString());
-                    }
+                    Console.WriteLine(logMessage.ToString());
                 }
-            });
-            // log in database
+            }
         }
 
         public static void Log(

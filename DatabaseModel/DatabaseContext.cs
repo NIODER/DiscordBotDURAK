@@ -26,6 +26,7 @@ namespace DatabaseModel.Context
         public virtual DbSet<Symbol> Symbols { get; set; }
         public virtual DbSet<SymbolsListsToChannels> SymbolsListsToChannels { get; set; }
         public virtual DbSet<SymbolsListsToSymbols> SymbolsListsToSymbols { get; set; }
+        public virtual DbSet<Logs> Logs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -190,6 +191,31 @@ namespace DatabaseModel.Context
                 symbol.HasMany(s => s.SymbolsLists)
                     .WithMany(sl => sl.Symbols)
                     .UsingEntity<SymbolsListsToSymbols>();
+            });
+
+            modelBuilder.HasSequence<long>("LogId")
+                .StartsAt(1)
+                .IncrementsBy(1);
+
+            modelBuilder.Entity<Logs>(log =>
+            {
+                log.HasKey(l => l.LogId);
+                log.Property(l => l.LogId)
+                    .HasDefaultValueSql("nextval('\"LogId\"')")
+                    .IsRequired(true);
+                log.Property(l => l.LogSeverity)
+                    .IsRequired(true);
+                log.Property(l => l.Source)
+                    .HasDefaultValue("unknown")
+                    .IsRequired(true);
+                log.Property(l => l.Message)
+                    .HasDefaultValue("unknown")
+                    .IsRequired(true);
+                log.Property(l => l.Exception)
+                    .IsRequired(false);
+                log.Property(l => l.Created)
+                    .HasDefaultValue(DateTime.UtcNow)
+                    .IsRequired(true);
             });
 
             base.OnModelCreating(modelBuilder);

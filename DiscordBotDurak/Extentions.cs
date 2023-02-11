@@ -1,4 +1,5 @@
 ﻿using CyberShoke.Objects;
+using DatabaseModel;
 using Discord;
 using Discord.WebSocket;
 using System;

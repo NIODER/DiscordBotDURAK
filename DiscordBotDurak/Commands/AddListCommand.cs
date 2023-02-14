@@ -2,9 +2,7 @@
 using Discord;
 using DiscordBotDurak.Data;
 using DiscordBotDurak.Enum.ModerationModes;
-using DiscordBotDurak.Verification;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DiscordBotDurak.Commands
 {
@@ -12,7 +10,7 @@ namespace DiscordBotDurak.Commands
     {
         private readonly long _scope;
         private readonly ulong? _list;
-        private ModerationMode? _moderationMode;
+        private readonly ModerationMode? _moderationMode;
         private readonly string _title;
         private readonly ulong _guildId;
         private readonly ulong _channelId;
@@ -35,7 +33,7 @@ namespace DiscordBotDurak.Commands
         /// <param name="symbolsList">Symbols list need to replace.</param>
         /// <param name="guildId">Guild where need to replace symbols list.</param>
         /// <returns>New symbols list without symbol with id: <paramref name="symbolId"/>.</returns>
-        private SymbolsList DublicateSymbolsList(SymbolsList symbolsList, ulong guildId)
+        private static SymbolsList DublicateSymbolsList(SymbolsList symbolsList, ulong guildId)
         {
             using var db = new Database();
             var symbols = db.GetSymbolsListsToSymbols(symbolsList.ListId);
@@ -77,97 +75,95 @@ namespace DiscordBotDurak.Commands
 
         public CommandResult GetResult()
         {
+            bool createNew = _list is null;
+            bool properties = _moderationMode is not null ||
+                _resendChannelId is not null;
             using var db = new Database();
-            var symbolsList = new SymbolsList();
-
-            // не указан id списка символов, создаем новый
-            if (_list is null)
+            if (createNew)
             {
-                if (_moderationMode == ModerationMode.OnlyResend && _resendChannelId is null)
-                {
-                    Logger.Log(LogSeverity.Info, GetType().Name, "No resend message specified for resend moderation mode.");
-                    return new CommandResult().WithException("You need to attach resend channel for this moderation mode.");
-                }
                 db.BeginTransaction();
-                symbolsList = db.CreateSymbolsList(_title);
-                if (_scope == 0)
+                var newList = db.CreateSymbolsList(_title);
+                if (_moderationMode is not null)
                 {
-                    db.AddSymbolsListToGuild(_guildId, symbolsList);
+                    if (_resendChannelId is null && _moderationMode == ModerationMode.OnlyResend)
+                    {
+                        db.RollBack();
+                        return new CommandResult().WithException($"You must set resend channel for moderation mode \"{_moderationMode}\".");
+                    }
                 }
-                else
-                {
-                    db.AddSymbolsListToChannel(symbolsList.ListId, _channelId, _moderationMode ?? ModerationMode.NonModerated, _resendChannelId);
-                }
+                db.AddSymbolsListToGuild(_guildId, newList);
                 db.CommitAsync().Wait();
-                return new CommandResult().WithEmbed(new EmbedBuilder()
-                    .WithColor(Color.Blue)
-                    .AddField("Succesfully:", $"List added id: {symbolsList.ListId}")
-                    .WithFooter("list command")
-                    .WithCurrentTimestamp());
-            }
-            // id указан, значит изменяем старый
-            else
-            {
-                if (_list == 0)
-                {
-                    return new CommandResult().WithException("List id overflow exception.");
-                }
-                symbolsList = db.GetSymbolsList(_list.Value);
-                if (db.GetGuildSymbolsLists(_guildId) is null)
-                {
-                    db.AddSymbolsListToGuild(_guildId, symbolsList);
-                }
-                // если указан scope channel, то добавляем список в канал
                 if (_scope == 1)
                 {
-                    if (!db.GetChannel(_channelId).SymbolsLists.Contains(symbolsList))
+                    db.BeginTransaction();
+                    db.AddSymbolsListToChannel(newList.ListId, _channelId, _moderationMode.Value, _resendChannelId);
+                    db.CommitAsync().Wait();
+                }
+                return new CommandResult().WithEmbed(new EmbedBuilder()
+                    .WithColor(Color.Blue)
+                    .WithCurrentTimestamp()
+                    .WithFooter("list command")
+                    .AddField("List created", $"Code: {newList.ListId}#{newList.Title}."));
+            }
+            else
+            {
+                db.BeginTransaction();
+                var list = db.GetSymbolsList(_list.Value);
+                if (list is null)
+                {
+                    return new CommandResult().WithException($"There is no list with id: {_list}.");
+                }
+                if (properties)
+                {
+                    if (_title is not null) // if we changing shared list
                     {
-                        db.AddSymbolsListToChannel(symbolsList.ListId, _channelId, _moderationMode.GetValueOrDefault(), _resendChannelId);
+                        list.Title = _title;
+                        if (list.Guilds.Count > 1)
+                        {
+                            list = DublicateSymbolsList(list, _guildId);
+                        }
+                        else
+                        {
+                            db.AddSymbolsListToGuild(_guildId, list);
+                        }
                     }
-                    else
+                    if (_moderationMode is not null)
                     {
-                        db.BeginTransaction();
-                        var sltc = db.GetSymbolsListToChannel(_channelId, symbolsList.ListId);
-                        if (_moderationMode.HasValue)
+                        if (_resendChannelId is null && _moderationMode == ModerationMode.OnlyResend)
                         {
-                            sltc.Moderation = (short)_moderationMode.Value;
+                            db.RollBack();
+                            return new CommandResult().WithException($"You must set resend channel for moderation mode \"{_moderationMode}\".");
                         }
-                        if (_resendChannelId.HasValue)
+                        var sltc = db.GetSymbolsListToChannel(_channelId, list.ListId);
+                        if (sltc is null)
                         {
-                            sltc.ResendChannelId = _resendChannelId.Value;
+                            db.BeginTransaction();
+                            db.AddSymbolsListToChannel(list.ListId, _channelId, _moderationMode.Value, _resendChannelId);
+                            db.CommitAsync().Wait();
+                            sltc = db.GetSymbolsListToChannel(_channelId, list.ListId);
                         }
+                        sltc.Moderation = (short)_moderationMode;
+                        sltc.ResendChannelId = _resendChannelId;
                         db.UpdateSymbolsListToChannel(sltc);
                         db.CommitAsync().Wait();
                     }
                 }
-                if (_title is null)
-                {
-                    return new CommandResult().WithEmbed(new EmbedBuilder()
-                            .WithColor(Color.Blue)
-                            .AddField("Successfully:", $"Added list {symbolsList.ListId} to {(_scope == 0 ? "guild" : "channel")} {_channelId}")
-                            .WithFooter("list command")
-                            .WithCurrentTimestamp());
-                }
                 else
                 {
-                    db.BeginTransaction();
-                    // если список делять несколько гильдий, то дублируем его для изменения в текущей
-                    if (symbolsList.Guilds.Count > 1)
-                    {
-                        symbolsList = DublicateSymbolsList(symbolsList, _guildId);
-                    }
-                    symbolsList.Title = _title;
+                    db.AddSymbolsListToGuild(_guildId, list);
                     db.CommitAsync().Wait();
+                    if (_scope == 1)
+                    {
+                        db.BeginTransaction();
+                        db.AddSymbolsListToChannel(list.ListId, _channelId, _moderationMode.Value, _resendChannelId);
+                        db.CommitAsync().Wait();
+                    }
                 }
-
                 return new CommandResult().WithEmbed(new EmbedBuilder()
                     .WithColor(Color.Blue)
-                    .AddField("Successfully:", $"Updated. New ListId: {symbolsList.ListId}.\n" +
-                        $"Symbols count: {symbolsList.Symbols.Count}.\n" +
-                        $"Title: {symbolsList.Title}.")
-                    .AddField("Channels:", symbolsList.Channels.Aggregate(", ", (s, c) => s += c.ChannelId))
+                    .WithCurrentTimestamp()
                     .WithFooter("list command")
-                    .WithCurrentTimestamp());
+                    .AddField("List added", $"Code: {list.ListId}#{list.Title}."));
             }
         }
     }

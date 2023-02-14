@@ -23,7 +23,7 @@ namespace DiscordBotDurak.CommandHandlers
             users = new List<ulong>();
             exception = null;
             var mentionString = (string)slashCommand.Data.Options.First(option => option.Name == "mentions").Value;
-            count = (long)(slashCommand.Data.Options.FirstOrDefault(options => options.Name == "count")?.Value ?? 1);
+            count = (long)(slashCommand.Data.Options.FirstOrDefault(options => options.Name == "count")?.Value ?? (long)1);
             guild = ((IGuildChannel)slashCommand.Channel).Guild;
             users = ProcessMentionsAsync(mentionString.Split(',')).Result;
             if (users.Count == 0)

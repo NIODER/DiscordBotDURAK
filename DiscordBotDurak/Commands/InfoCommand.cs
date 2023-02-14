@@ -136,7 +136,8 @@ namespace DiscordBotDurak.Commands
                 .WithColor(Color.Blue)
                 .AddField("Result:", info.ToString())
                 .WithFooter("info command")
-                .WithCurrentTimestamp());
+                .WithCurrentTimestamp())
+                .WithEphemeral(true);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace DiscordBotDurak
         public MessageComponent MessageComponent { get; private set; }
         public Embed[] Embeds { get; private set; }
         public Exception Exception { get; private set; }
+        public bool Ephemeral { get; private set; } = false;
 
         public CommandResult()
         {
@@ -78,6 +79,12 @@ namespace DiscordBotDurak
         public CommandResult WithException(string message)
         {
             Exception = new Exception(message);
+            return this;
+        }
+
+        public CommandResult WithEphemeral(bool ephemeral)
+        {
+            Ephemeral = ephemeral;
             return this;
         }
     }

@@ -23,10 +23,16 @@ namespace DiscordBotDurak
                 return;
             }
             _processingGuilds.Add(guild.Id);
-            var message = guild.DefaultChannel.SendMessageAsync("Processing your guild...");
             using var database = new Database();
             if (database.GetGuild(guild.Id) is null)
             {
+                var message = await guild.DefaultChannel.SendMessageAsync(embed: new EmbedBuilder()
+                    .WithColor(Color.Green)
+                    .WithCurrentTimestamp()
+                    .WithFooter("configuration")
+                    .AddField("Processing guild", "Sending base message, adding guild to database with default settings." +
+                    "\n#This text will be removed automaticly.")
+                    .Build());
                 Logger.Log(LogSeverity.Debug, "ProcessGuild", $"Guild {guild.Id} is not in database");
                 var guildOwnerDMChannel = guild.Owner.CreateDMChannelAsync().Result;
                 await guildOwnerDMChannel.SendMessageAsync(new Constants().GetOwnerMessage());
@@ -38,16 +44,26 @@ namespace DiscordBotDurak
                     "GuildHangler", 
                     "Exception occured while guild adding.", 
                     database.Exception);
+                await message.ModifyAsync(pr =>
+                {
+                    pr.Embed = new EmbedBuilder()
+                        .WithColor(Color.Green)
+                        .WithCurrentTimestamp()
+                        .WithFooter("configuration")
+                        .AddField("Processing guild", "Ready.\n#This text will be removed automaticly.")
+                        .Build();
+                });
+                _ = Task.Run(() =>
+                {
+                    Task.Delay(30000).Wait();
+                    _ = message.DeleteAsync();
+                });
             }
             var processingChannelTasks = guild.TextChannels.Select(ProcessChannel).ToArray();
             var processingUsersTasks = guild.Users.Select(ProcessUser).ToArray();
             Task.WaitAll(processingChannelTasks);
             Task.WaitAll(processingUsersTasks);
             _processingGuilds.Remove(guild.Id);
-            await message.Result.DeleteAsync();
-            var message1 = await guild.DefaultChannel.SendMessageAsync("Ready!");
-            await Task.Delay(30000);
-            await message1.DeleteAsync();
         }
 
         public async Task ProcessChannel(SocketGuildChannel channel)

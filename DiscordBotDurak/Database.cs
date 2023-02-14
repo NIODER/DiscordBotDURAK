@@ -577,6 +577,12 @@ namespace DiscordBotDurak.Data
             }
         }
 
+        public void RollBack()
+        {
+            Transaction.Rollback();
+            Transaction.Dispose();
+        }
+
         /// <summary>
         /// Commits changes in database async.
         /// </summary>

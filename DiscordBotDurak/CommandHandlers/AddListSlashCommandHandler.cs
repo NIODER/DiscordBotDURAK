@@ -19,7 +19,7 @@ namespace DiscordBotDurak.CommandHandlers
 
         public AddListSlashCommandHandler(SocketSlashCommand command)
         {
-            _scope = (long)command.Data.Options.First(op => op.Name == "scope").Value;
+            _scope = (long)(command.Data.Options.FirstOrDefault(op => op.Name == "scope")?.Value ?? 0);
             var opt = command.Data.Options.FirstOrDefault(op => op.Name == "list-id")?.Value;
             if (opt is not null)
             {

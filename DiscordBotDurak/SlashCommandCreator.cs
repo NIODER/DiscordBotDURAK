@@ -146,7 +146,7 @@ namespace DiscordBotDurak
                     .WithType(ApplicationCommandOptionType.Integer)
                     .AddChoice("guild", 0)
                     .AddChoice("channel", 1)
-                    .WithRequired(true))
+                    .WithRequired(false))
                 .AddOption("list-id", ApplicationCommandOptionType.Number, "List id need to add. Leave empty to create new list.", isRequired: false)
                 .AddOption("title", ApplicationCommandOptionType.String, "List title. \"Untitled\" by default.", isRequired: false)
                 .AddOption(new SlashCommandOptionBuilder()

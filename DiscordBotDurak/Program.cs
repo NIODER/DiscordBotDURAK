@@ -75,18 +75,19 @@ namespace DiscordBotDurak
             await _client.StopAsync();
         }
 
-        private async Task OnChannelCreated(SocketChannel channel)
+        private Task OnChannelCreated(SocketChannel channel)
         {
             Logger.Log(LogSeverity.Info, "OnChannelCreated", "Channel created intent activated.");
             if (channel is not SocketGuildChannel and ISocketMessageChannel)
-                return;
+                return Task.CompletedTask;
             _ = ((ISocketMessageChannel)channel).SendMessageAsync(embed: new EmbedBuilder()
                 .WithColor(Color.Green)
                 .WithTitle("Info")
                 .AddField("New channel detected:", "Channel added in database with default settings.")
                 .WithFooter("DiscordBotDurak moderation")
                 .WithCurrentTimestamp().Build());
-            await new GuildHandler().ProcessChannel(channel as SocketGuildChannel);
+            _ = new GuildHandler().ProcessChannel(channel as SocketGuildChannel);
+            return Task.CompletedTask;
         }
 
         private async Task OnChannelDestroyed(SocketChannel channel)
@@ -127,10 +128,10 @@ namespace DiscordBotDurak
             return Task.CompletedTask;
         }
 
-        private async Task OnGuildUnavailable(SocketGuild guild)
+        private Task OnGuildUnavailable(SocketGuild guild)
         {
             Logger.Log(LogSeverity.Info, "OnGuildAvailable", "Guild unavailable intent activated.");
-            await guild.DeleteApplicationCommandsAsync();
+            return Task.CompletedTask;
         }
 
         private Task OnLeftGuild(SocketGuild guild)
@@ -281,16 +282,15 @@ namespace DiscordBotDurak
         {
             Logger.Log(LogSeverity.Info, "Program", $"Guild joined {guild.Id}.");
             _ = guild.DownloadUsersAsync();
-            Logger.Log(LogSeverity.Debug, "OnGuildJoined", $"Users count {guild.Users.Count}");
             return Task.CompletedTask;
         }
 
-        private async Task OnMembersDownloaded(SocketGuild guild)
+        private Task OnMembersDownloaded(SocketGuild guild)
         {
             Logger.Log(LogSeverity.Debug, "Program", "OnMembersDownloaded intent activated.");
-            Logger.Log(LogSeverity.Debug, "OnMembersDownloaded", $"Members count {guild.Users.Count}");
             var guildHandler = new GuildHandler();
-            await guildHandler.ProcessGuild(guild);
+            _ = guildHandler.ProcessGuild(guild);
+            return Task.CompletedTask;
         }
 
         private Task OnSlashCommandExecuted(SocketSlashCommand slashCommand)
@@ -325,7 +325,7 @@ namespace DiscordBotDurak
                     "spy-mode" => new SetSpyModeSlashCommandHandler(slashCommand),
                     "stop" => new StopCommandHandler(slashCommand),
                     "warning-message" => new WarningMessageSlashCommandHandler(slashCommand),
-                    _ => throw new ArgumentOutOfRangeException("CommandName")
+                    _ => throw new ArgumentOutOfRangeException(slashCommand.CommandName)
                 };
                 var verifiable = commandHandler as IVerifiable;
                 if (!verifiable.Verify(slashCommand.User.Id, slashCommand.GuildId.Value))

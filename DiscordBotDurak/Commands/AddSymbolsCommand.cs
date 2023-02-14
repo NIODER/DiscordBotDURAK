@@ -2,7 +2,6 @@
 using Discord;
 using DiscordBotDurak.Data;
 using DiscordBotDurak.Enum.ModerationModes;
-using DiscordBotDurak.Verification;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -28,25 +27,6 @@ namespace DiscordBotDurak.Commands
         public AddSymbolsCommand(Exception exception)
         {
             _exception = exception;
-        }
-
-        private ulong AddSymbolToLists()
-        {
-            using var db = new Database();
-            db.BeginTransaction();
-            var symbol = db.FindSymbol(_content) ?? db.AddSymbol(_content);
-            db.CommitAsync().Wait();
-            db.BeginTransaction();
-            foreach (var list in _lists)
-            {
-                var symbolsList = db.GetSymbolsList(list);
-                db.AddSymbolToBanwordList(symbolsList, symbol, _excluded);
-            }
-            if (!db.CommitAsync().Result)
-            {
-                _exception = new Exception("Something went wrong.");
-            }
-            return db.FindSymbol(_content).SymbolId;
         }
 
         /// <summary>
@@ -102,6 +82,7 @@ namespace DiscordBotDurak.Commands
             ulong symbolId = 0;
             var replaces = new Dictionary<ulong, ulong>(); // old : new list ids
             using var db = new Database();
+            db.BeginTransaction();
             foreach (var list in _lists)
             {
                 var symbolsList = db.GetSymbolsList(list);
@@ -117,6 +98,7 @@ namespace DiscordBotDurak.Commands
                     db.AddSymbolToBanwordList(symbolsList, symbol, _excluded);
                 }
             }
+            db.CommitAsync().Wait();
             var result = new StringBuilder($"Added symbol id: {symbolId} in lists: ");
             foreach (var list in _lists)
             {
